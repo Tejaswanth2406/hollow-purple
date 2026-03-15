@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hollow Purple · Security Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        /* ─── Design Tokens ──────────────────────────────────────────────────── */
+        :root {
+            --bg: #0c0e0f;
+            --bg-1: #111416;
+            --bg-2: #161a1c;
+            --bg-3: #1d2225;
+            --bg-4: #242a2e;
+
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-2: rgba(255, 255, 255, 0.055);
+
+            --border: rgba(255, 255, 255, 0.07);
+            --border-2: rgba(255, 255, 255, 0.11);
+
+            --text-primary: #e8e4dc;
+            --text-2: #a09890;
+            --text-3: #6a6460;
+
+            /* Accent — deep forest / jade */
+            --accent: #4e9e78;
+            --accent-dim: rgba(78, 158, 120, 0.15);
+            --accent-glow: rgba(78, 158, 120, 0.08);
+
+            /* Danger */
+            --red: #c84040;
+            --red-dim: rgba(200, 64, 64, 0.12);
+
+            /* Warning */
+            --amber: #c89030;
+            --amber-dim: rgba(200, 144, 48, 0.12);
+
+            /* Mauve */
+            --mauve: #9060a0;
+            --mauve-dim: rgba(144, 96, 160, 0.12);
+
+            --font-display: 'DM Serif Display', serif;
+            --font-sans: 'DM Sans', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            --radius: 6px;
+            --radius-sm: 4px;
+        }
+
+        /* ─── Reset ──────────────────────────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 13px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            line-height: 1.55;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Subtle noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.6;
+        }
+
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-4);
+            border-radius: 3px;
+        }
+
+        /* ─── App Shell ──────────────────────────────────────────────────────── */
+        #app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════
+       TOPNAV
+    ══════════════════════════════════════════════════════════════════════ */
+        #topnav {
+            display: flex;
+            align-items: center;
+            height: 52px;
+            padding: 0 24px;
+            background: rgba(12, 14, 15, 0.92);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            gap: 0;
+        }
+
+        /* Brand */
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-right: 24px;
+            border-right: 1px solid var(--border);
+            margin-right: 24px;
+            flex-shrink: 0;
+        }
+
+        /* Orchid logomark — refined geometric */
+        .nav-logo {
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .nav-title {
+            font-family: var(--font-display);
+            font-size: 17px;
+            color: var(--text-primary);
+            letter-spacing: 0.01em;
+            line-height: 1;
+        }
+
+        .nav-subtitle {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-3);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* Nav tabs */
+        .nav-tabs {
+            display: flex;
+            align-items: stretch;
+            height: 52px;
+            gap: 0;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            color: var(--text-3);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-2);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 12px;
+            right: 12px;
+            height: 1.5px;
+            background: var(--accent);
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* Right side */
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-clock {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-3);
+            letter-spacing: 0.1em;
+        }
+
+        .health-chip {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 12px;
+            border: 1px solid rgba(78, 158, 120, 0.25);
+            border-radius: 100px;
+            background: var(--accent-dim);
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            color: var(--accent);
+            letter-spacing: 0.12em;
+        }
+
+        .pulse {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .pulse::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0;
+            animation: pulse 2.8s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════
+       MASTHEAD
+    ══════════════════════════════════════════════════════════════════════ */
+        #masthead {
+            background: var(--bg-1);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 72px;
+            gap: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle diagonal grid lines */
+        #masthead::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                repeating-linear-gradient(-45deg,
+                    transparent,
+                    transparent 28px,
+                    rgba(255, 255, 255, 0.015) 28px,
+                    rgba(255, 255, 255, 0.015) 29px);
+            pointer-events: none;
+        }
+
+        /* Green glow top-left */
+        #masthead::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: -40px;
+            width: 300px;
+            height: 200px;
+            background: radial-gradient(ellipse, rgba(78, 158, 120, 0.08) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .masthead-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .masthead-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .masthead-eyebrow::before {
+            content: '';
+            display: inline-block;
+            width: 18px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .masthead-heading {
+            font-family: var(--font-display);
+            font-size: 36px;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1;
+            letter-spacing: -0.01em;
+        }
+
+        .masthead-heading span {
+            color: var(--accent);
+        }
+
+        .masthead-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .masthead-stat {
+            text-align: right;
+        }
+
+        .masthead-stat-val {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .masthead-stat-val.red {
+            color: var(--red);
+        }
+
+        .masthead-stat-val.amber {
+            color: var(--amber);
+        }
+
+        .masthead-stat-val.accent {
+            color: var(--accent);
+        }
+
+        .masthead-stat-label {
+            font-family: var(--font-mono);
+            font-size: 8.5px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .masthead-divider {
+            width: 1px;
+            height: 36px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════
+       STATUS ROW
+    ══════════════════════════════════════════════════════════════════════ */
+        #status-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-1);
+        }
+
+        .metric {
+            padding: 16px 20px;
+            border-right: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: background 0.2s;
+        }
+
+        .metric:last-child {
+            border-right: none;
+        }
+
+        .metric::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--m-accent, var(--accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s var(--ease);
+        }
+
+        .metric:hover::before {
+            transform: scaleX(1);
+        }
+
+        .metric:hover {
+            background: var(--surface);
+        }
+
+        .metric-label {
+            font-family: var(--font-mono);
+            font-size: 8px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-family: var(--font-display);
+            font-size: 36px;
+            font-style: italic;
+            color: var(--m-accent, var(--text-primary));
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .metric-delta {
+            font-family: var(--font-mono);
+            font-size: 8px;
+            color: var(--text-3);
+            margin-top: 4px;
+        }
+
+        .metric-delta.up {
+            color: var(--red);
+        }
+
+        .metric-delta.down {
+            color: var(--accent);
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT GRID
+    ══════════════════════════════════════════════════════════════════════ */
+        #main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 1fr auto;
+            grid-template-areas:
+                "alerts  graph  activity"
+                "footer  footer footer";
+            min-height: 0;
+        }
+
+        /* ─── Panel Base ─────────────────────────────────────────────────────── */
+        .panel {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            border-right: 1px solid var(--border);
+            background: var(--bg);
+            animation: fadeUp 0.5s var(--ease) both;
+        }
+
+        .panel:last-of-type {
+            border-right: none;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            background: var(--bg-1);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-sans);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-2);
+        }
+
+        .panel-title svg {
+            width: 13px;
+            height: 13px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .panel-badge {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            border: 1px solid var(--border-2);
+            color: var(--text-3);
+            letter-spacing: 0.06em;
+            background: var(--surface);
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════
+       ALERTS PANEL
+    ══════════════════════════════════════════════════════════════════════ */
+        #alerts-panel {
+            grid-area: alerts;
+        }
+
+        /* Drift meter */
+        .drift-section {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .drift-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 7px;
+        }
+
+        .drift-title {
+            font-family: var(--font-mono);
+            font-size: 8px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text-3);
+        }
+
+        .drift-val {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--amber);
+        }
+
+        .drift-track {
+            height: 2px;
+            background: var(--bg-4);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .drift-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--amber), var(--red));
+            border-radius: 2px;
+            transition: width 1s var(--ease);
+        }
+
+        /* Severity filter */
+        .sev-filter {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sev-btn {
+            flex: 1;
+            padding: 7px 0;
+            font-family: var(--font-mono);
+            font-size: 8.5px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: none;
+            border-right: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-3);
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .sev-btn:last-child {
+            border-right: none;
+        }
+
+        .sev-btn:hover {
+            color: var(--text-2);
+            background: var(--surface);
+        }
+
+        .sev-btn.active {
+            color: var(--btn-c, var(--accent));
+            background: var(--surface-2);
+        }
+
+        /* Alert items */
+        .alert-item {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: default;
+            transition: background 0.18s;
+            position: relative;
+            animation: slideIn 0.3s var(--ease) both;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert-item:hover {
+            background: var(--surface);
+        }
+
+        .alert-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 18%;
+            bottom: 18%;
+            width: 2px;
+            background: var(--a-color, var(--amber));
+            border-radius: 0 2px 2px 0;
+        }
+
+        .alert-row1 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .sev-badge {
+            font-family: var(--font-mono);
+            font-size: 7.5px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 3px;
+            border: 1px solid var(--a-color, var(--amber));
+            color: var(--a-color, var(--amber));
+            background: transparent;
+            flex-shrink: 0;
+        }
+
+        .alert-title {
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .alert-meta {
+            display: flex;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 8px;
+            color: var(--text-3);
+        }
+
+        .alert-source {
+            color: var(--text-2);
+        }
+
+        .a-critical {
+            --a-color: #c84040;
+        }
+
+        .a-high {
+            --a-color: #c07030;
+        }
+
+        .a-medium {
+            --a-color: #c89030;
+        }
+
+        .a-low {
+            --a-color: #4e9e78;
+        }
+
+        .a-info {
+            --a-color: #6a6460;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════
+       GRAPH PANEL
+    ══════════════════════════════════════════════════════════════════════ */
+        #graph-panel {
+            grid-area: graph;
+            border-right: 1px solid var(--border);
+        }
+
+        .graph-toolbar {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-1);
+            flex-shrink: 0;
+        }
+
+        .graph-btn {
+            padding: 7px 14px;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: none;
+            border-right: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-3);
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .graph-btn:hover {
+            color: var(--text-primary);
+            background: var(--surface);
+        }
+
+        .graph-selected {
+            margin-left: auto;
+            padding-right: 14px;
+            font-family: var(--font-mono);
+            font-size: 8.5px;
+            color: var(--text-3);
+        }
+
+        #graph-canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            margin: 12px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-2);
+            background: var(--bg-1);
+        }
+
+        #graph-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #graph-tooltip {
+            position: absolute;
+            background: var(--bg-2);
+            border: 1px solid var(--border-2);
+            border-radius: var(--radius);
+            padding: 10px 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 10;
+            min-width: 160px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        #graph-tooltip.visible {
+            opacity: 1;
+        }
+
+        .tt-name {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tt-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-family: var(--font-mono);
+            font-size: 8px;
+            color: var(--text-3);
+            margin-top: 3px;
+        }
+
+        .tt-row span:last-child {
+            color: var(--text-2);
+        }
+
+        .graph-legend {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 8px 16px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            background: var(--bg-1);
+        }
+
+        .leg-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 8.5px;
+            letter-spacing: 0.08em;
+            color: var(--text-3);
+        }
+
+        .leg-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════
+       ACTIVITY PANEL
+    ══════════════════════════════════════════════════════════════════════ */
+        #activity-panel {
+            grid-area: activity;
+        }
+
+        .act-item {
+            display: grid;
+            grid-template-columns: 38px 1fr;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.18s;
+            animation: slideIn 0.3s var(--ease) both;
+        }
+
+        .act-item:hover {
+            background: var(--surface);
+        }
+
+        .act-time {
+            font-family: var(--font-mono);
+            font-size: 8px;
+            color: var(--text-3);
+            padding-top: 1px;
+        }
+
+        .act-content {
+            font-family: var(--font-sans);
+            font-size: 11.5px;
+            color: var(--text-2);
+            line-height: 1.5;
+        }
+
+        .act-content strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .act-tag {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
+            border: 1px solid;
+            font-family: var(--font-mono);
+            font-size: 7.5px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .tag-identity {
+            border-color: rgba(78, 158, 120, 0.3);
+            color: var(--accent);
+        }
+
+        .tag-resource {
+            border-color: rgba(200, 144, 48, 0.3);
+            color: var(--amber);
+        }
+
+        .tag-drift {
+            border-color: rgba(200, 64, 64, 0.3);
+            color: var(--red);
+        }
+
+        .tag-policy {
+            border-color: rgba(255, 255, 255, 0.12);
+            color: var(--text-3);
+        }
+
+        .tag-alert {
+            border-color: rgba(200, 64, 64, 0.3);
+            color: var(--red);
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════════════════════════════════ */
+        #footer-bar {
+            grid-area: footer;
+            display: flex;
+            align-items: center;
+            height: 32px;
+            padding: 0 20px;
+            background: var(--bg-1);
+            border-top: 1px solid var(--border);
+        }
+
+        .foot-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 8.5px;
+            color: var(--text-3);
+            letter-spacing: 0.12em;
+            padding: 0 14px;
+            border-right: 1px solid var(--border);
+            height: 100%;
+        }
+
+        .foot-item:first-child {
+            padding-left: 0;
+        }
+
+        .foot-item .val {
+            color: var(--text-2);
+        }
+
+        .foot-item .val.accent {
+            color: var(--accent);
+        }
+
+        .foot-item .val.amber {
+            color: var(--amber);
+        }
+
+        .foot-item .val.red {
+            color: var(--red);
+        }
+
+        #conn-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--font-mono);
+            font-size: 8.5px;
+            letter-spacing: 0.1em;
+        }
+
+        /* ─── Empty / loading states ─────────────────────────────────────────── */
+        .empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-3);
+            letter-spacing: 0.12em;
+        }
+
+        .skel {
+            height: 12px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--bg-2) 25%, var(--bg-3) 50%, var(--bg-2) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.6s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ─── Toast ──────────────────────────────────────────────────────────── */
+        #toast-container {
+            position: fixed;
+            bottom: 40px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            padding: 10px 14px;
+            background: var(--bg-2);
+            border: 1px solid var(--border-2);
+            border-left: 2px solid var(--t-color, var(--accent));
+            border-radius: var(--radius);
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            color: var(--text-2);
+            animation: toastIn 0.3s var(--ease-spring);
+            max-width: 280px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ─── Responsive ─────────────────────────────────────────────────────── */
+        @media (max-width: 1100px) {
+            #main {
+                grid-template-columns: 260px 1fr;
+                grid-template-areas:
+                    "alerts  graph"
+                    "activity activity"
+                    "footer  footer";
+            }
+        }
+
+        @media (max-width: 700px) {
+            #main {
+                grid-template-columns: 1fr;
+                grid-template-areas: "alerts" "graph" "activity" "footer";
+            }
+
+            #status-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .nav-tabs {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <!-- ── Top nav ───────────────────────────────────────────────────────────── -->
+        <nav id="topnav">
+            <div class="nav-brand">
+                <svg class="nav-logo" viewBox="0 0 28 28" fill="none">
+                    <!-- Horizon line -->
+                    <line x1="2" y1="18" x2="26" y2="18" stroke="#4e9e78" stroke-width="1.3" stroke-linecap="round" />
+                    <!-- Sun arc -->
+                    <path d="M7 18 A7 7 0 0 1 21 18" fill="none" stroke="#4e9e78" stroke-width="1.6"
+                        stroke-linecap="round" />
+                    <!-- Center -->
+                    <circle cx="14" cy="18" r="2" fill="#4e9e78" />
+                    <!-- Rays -->
+                    <line x1="14" y1="4" x2="14" y2="7.5" stroke="#4e9e78" stroke-width="1.3" stroke-linecap="round" />
+                    <line x1="21.2" y1="6" x2="18.9" y2="8.3" stroke="#4e9e78" stroke-width="1.3"
+                        stroke-linecap="round" />
+                    <line x1="24" y1="13" x2="20.5" y2="13" stroke="#4e9e78" stroke-width="1.3"
+                        stroke-linecap="round" />
+                    <line x1="6.8" y1="6" x2="9.1" y2="8.3" stroke="#4e9e78" stroke-width="1.3"
+                        stroke-linecap="round" />
+                    <line x1="4" y1="13" x2="7.5" y2="13" stroke="#4e9e78" stroke-width="1.3" stroke-linecap="round" />
+                </svg>
+                <div>
+                    <div class="nav-title">Hollow Purple</div>
+                    <div class="nav-subtitle">Security Operations · v2.4.1</div>
+                </div>
+            </div>
+
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-view="overview">Overview</button>
+                <button class="nav-tab" data-view="identities">Identities</button>
+                <button class="nav-tab" data-view="resources">Resources</button>
+                <button class="nav-tab" data-view="policies">Policies</button>
+                <button class="nav-tab" data-view="audit">Audit Log</button>
+            </nav>
+
+            <div class="nav-right">
+                <div class="nav-clock" id="nav-clock">--:--:-- UTC</div>
+                <div class="health-chip" id="health-badge">
+                    <div class="pulse" id="health-dot"></div>
+                    <span id="health-label">Nominal</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Masthead ──────────────────────────────────────────────────────────── -->
+        <div id="masthead">
+            <div class="masthead-left">
+                <div class="masthead-eyebrow">Security Operations Center</div>
+                <div class="masthead-heading"><em>Hollow</em> <span>Purple</span></div>
+            </div>
+            <div class="masthead-right">
+                <div class="masthead-stat">
+                    <div class="masthead-stat-val accent" id="ms-identities">—</div>
+                    <div class="masthead-stat-label">Active Identities</div>
+                </div>
+                <div class="masthead-divider"></div>
+                <div class="masthead-stat">
+                    <div class="masthead-stat-val red" id="ms-critical">—</div>
+                    <div class="masthead-stat-label">Critical Alerts</div>
+                </div>
+                <div class="masthead-divider"></div>
+                <div class="masthead-stat">
+                    <div class="masthead-stat-val amber" id="ms-drift">—</div>
+                    <div class="masthead-stat-label">Drift Score</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Status row ────────────────────────────────────────────────────────── -->
+        <div id="status-row">
+            <div class="metric" style="--m-accent: #4e9e78">
+                <div class="metric-label">Active Identities</div>
+                <div class="metric-value" id="m-identities">—</div>
+                <div class="metric-delta" id="m-identities-d">loading…</div>
+            </div>
+            <div class="metric" style="--m-accent: #c84040">
+                <div class="metric-label">Critical Alerts</div>
+                <div class="metric-value" id="m-critical">—</div>
+                <div class="metric-delta" id="m-critical-d">loading…</div>
+            </div>
+            <div class="metric" style="--m-accent: #c89030">
+                <div class="metric-label">Drift Score Avg</div>
+                <div class="metric-value" id="m-drift">—</div>
+                <div class="metric-delta" id="m-drift-d">loading…</div>
+            </div>
+            <div class="metric" style="--m-accent: #6890b0">
+                <div class="metric-label">Policy Evaluations</div>
+                <div class="metric-value" id="m-evals">—</div>
+                <div class="metric-delta" id="m-evals-d">loading…</div>
+            </div>
+            <div class="metric" style="--m-accent: #5a9068">
+                <div class="metric-label">Resources Monitored</div>
+                <div class="metric-value" id="m-resources">—</div>
+                <div class="metric-delta" id="m-resources-d">loading…</div>
+            </div>
+            <div class="metric" style="--m-accent: #9060a0">
+                <div class="metric-label">Mitigations Today</div>
+                <div class="metric-value" id="m-mitigations">—</div>
+                <div class="metric-delta" id="m-mitigations-d">loading…</div>
+            </div>
+        </div>
+
+        <!-- ── Main grid ─────────────────────────────────────────────────────────── -->
+        <main id="main">
+
+            <!-- Alerts panel -->
+            <section id="alerts-panel" class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 14 14" fill="none">
+                            <path d="M7 1L13 12H1L7 1Z" stroke="currentColor" stroke-width="1.2" />
+                            <line x1="7" y1="5.5" x2="7" y2="8.5" stroke="currentColor" stroke-width="1.2" />
+                            <circle cx="7" cy="10.5" r="0.65" fill="currentColor" />
+                        </svg>
+                        Alert Stream
+                    </div>
+                    <span class="panel-badge" id="alert-count-badge">0</span>
+                </div>
+
+                <div class="drift-section">
+                    <div class="drift-header">
+                        <span class="drift-title">Drift Index</span>
+                        <span class="drift-val" id="drift-value-label">—</span>
+                    </div>
+                    <div class="drift-track">
+                        <div class="drift-fill" id="drift-bar" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="sev-filter">
+                    <button class="sev-btn active" data-level="all" style="--btn-c: var(--accent)">All</button>
+                    <button class="sev-btn" data-level="critical" style="--btn-c: #c84040">Crit</button>
+                    <button class="sev-btn" data-level="high" style="--btn-c: #c07030">High</button>
+                    <button class="sev-btn" data-level="medium" style="--btn-c: #c89030">Med</button>
+                    <button class="sev-btn" data-level="low" style="--btn-c: #4e9e78">Low</button>
+                </div>
+
+                <div class="panel-body">
+                    <div id="alerts-list">
+                        <div class="empty">Awaiting data…</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Graph panel -->
+            <section id="graph-panel" class="panel" style="display:flex; flex-direction:column;">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 14 14" fill="none">
+                            <circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.2" />
+                            <circle cx="1.5" cy="3" r="1.2" stroke="currentColor" stroke-width="1" />
+                            <circle cx="12.5" cy="3" r="1.2" stroke="currentColor" stroke-width="1" />
+                            <circle cx="1.5" cy="11" r="1.2" stroke="currentColor" stroke-width="1" />
+                            <circle cx="12.5" cy="11" r="1.2" stroke="currentColor" stroke-width="1" />
+                            <line x1="2.6" y1="3.9" x2="5.2" y2="5.8" stroke="currentColor" stroke-width="0.9" />
+                            <line x1="11.4" y1="3.9" x2="8.8" y2="5.8" stroke="currentColor" stroke-width="0.9" />
+                            <line x1="2.6" y1="10.1" x2="5.2" y2="8.2" stroke="currentColor" stroke-width="0.9" />
+                            <line x1="11.4" y1="10.1" x2="8.8" y2="8.2" stroke="currentColor" stroke-width="0.9" />
+                        </svg>
+                        Identity–Resource Graph
+                    </div>
+                    <span class="panel-badge" id="graph-node-count">0 nodes</span>
+                </div>
+
+                <div class="graph-toolbar">
+                    <button class="graph-btn" id="btn-reset-graph">Reset</button>
+                    <button class="graph-btn" id="btn-relayout">Relayout</button>
+                    <button class="graph-btn" id="btn-fit-graph">Fit All</button>
+                    <span class="graph-selected" id="graph-selected-label"></span>
+                </div>
+
+                <div id="graph-canvas-container">
+                    <canvas id="graph-canvas"></canvas>
+                    <div id="graph-tooltip"></div>
+                </div>
+
+                <div class="graph-legend">
+                    <div class="leg-item">
+                        <div class="leg-dot" style="background:#4e9e78"></div>Identity
+                    </div>
+                    <div class="leg-item">
+                        <div class="leg-dot" style="background:#9060a0"></div>Resource
+                    </div>
+                    <div class="leg-item">
+                        <div class="leg-dot" style="background:#c84040"></div>Flagged
+                    </div>
+                    <div class="leg-item">
+                        <div class="leg-dot" style="background:#c89030"></div>Drifting
+                    </div>
+                </div>
+            </section>
+
+            <!-- Activity panel -->
+            <section id="activity-panel" class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 14 14" fill="none">
+                            <path d="M1 7h2.5l1.5-4.5 2.5 9 2-5.5H13" stroke="currentColor" stroke-width="1.2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        Activity Feed
+                    </div>
+                    <span class="panel-badge" id="activity-count-badge">0</span>
+                </div>
+                <div class="panel-body">
+                    <div id="activity-feed">
+                        <div class="empty">Awaiting events…</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer id="footer-bar">
+                <div class="foot-item">Engine <span class="val accent" id="f-engine">v2.4.1</span></div>
+                <div class="foot-item">Policy <span class="val" id="f-hash">—</span></div>
+                <div class="foot-item">Uptime <span class="val" id="f-uptime">—</span></div>
+                <div class="foot-item">Ev/s <span class="val amber" id="f-eps">—</span></div>
+                <div id="conn-status">
+                    <div class="pulse" id="conn-dot" style="background: var(--amber);"></div>
+                    <span id="conn-label"
+                        style="color: var(--amber); font-family: var(--font-mono); font-size:8.5px; letter-spacing:0.1em;">Connecting</span>
+                </div>
+            </footer>
+
+        </main>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="graph_view.js"></script>
+    <script src="alerts_view.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+
+</html>

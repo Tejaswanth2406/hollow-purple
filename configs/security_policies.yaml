@@ -1,0 +1,284 @@
+# ============================================================
+# HOLLOW_PURPLE Policy: Crown Jewel Access
+# ============================================================
+
+name: crown_jewel_critical_access
+version: "2.0"
+enabled: true
+priority: 1
+description: |
+  Any access to a crown jewel resource with a high anomaly score
+  triggers immediate isolation and SOC escalation.
+tags:
+  - crown_jewel
+  - critical_asset
+scope: global
+
+condition:
+  alert_type: "regex:crown_jewel.*"
+  anomaly_score: ">0.70"
+
+actions:
+  - alert_soc
+  - page_oncall
+  - quarantine_resource
+  - snapshot_state
+  - log_forensic
+  - create_incident_ticket
+
+compliance:
+  - NIST_CSF:PR.DS-1
+  - ISO_27001:A.8.2.3
+  - PCI_DSS:7.1
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+
+---
+
+name: crown_jewel_elevated_monitoring
+version: "2.0"
+enabled: true
+priority: 30
+description: |
+  Any access to a crown jewel triggers elevated monitoring
+  regardless of anomaly score.
+tags:
+  - crown_jewel
+  - monitoring
+scope: global
+
+condition:
+  alert_type: "regex:crown_jewel.*"
+
+actions:
+  - increase_monitoring
+  - add_to_watchlist
+  - log_forensic
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+
+---
+# ============================================================
+# HOLLOW_PURPLE Policy: Lateral Movement
+# ============================================================
+
+name: lateral_movement_block
+version: "2.0"
+enabled: true
+priority: 8
+description: |
+  Respond to confirmed lateral movement patterns.
+  Revokes active tokens and triggers monitoring escalation.
+tags:
+  - lateral_movement
+  - network
+scope: global
+
+condition:
+  alert_type: "regex:lateral_movement.*"
+  severity:
+    - high
+    - critical
+
+actions:
+  - revoke_token
+  - alert_soc
+  - increase_monitoring
+  - add_to_watchlist
+  - create_incident_ticket
+
+compliance:
+  - NIST_CSF:DE.CM-1
+  - CIS_Control_12
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+
+---
+# ============================================================
+# HOLLOW_PURPLE Policy: Dormant Identity Reactivation
+# ============================================================
+
+name: dormant_identity_reactivation_response
+version: "2.0"
+enabled: true
+priority: 15
+description: |
+  A dormant identity (30+ days inactive) has suddenly acted.
+  Require MFA re-authentication and create an investigation ticket.
+tags:
+  - dormant_identity
+  - account_takeover
+scope: global
+
+condition:
+  alert_type: "regex:dormant_identity.*"
+
+actions:
+  - require_mfa_reauthentication
+  - increase_monitoring
+  - notify_identity_owner
+  - create_incident_ticket
+  - add_to_watchlist
+  - log_forensic
+
+compliance:
+  - NIST_CSF:PR.AC-1
+  - ISO_27001:A.9.2.6
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+
+---
+# ============================================================
+# HOLLOW_PURPLE Policy: Token Abuse — Critical
+# ============================================================
+
+name: token_abuse_critical_response
+version: "2.0"
+enabled: true
+priority: 3
+description: |
+  Impossible travel, revoked token reuse, or credential stuffing
+  triggers immediate token revocation and IP block.
+tags:
+  - token_abuse
+  - credential_theft
+scope: global
+
+condition:
+  alert_type: "regex:token_abuse.*"
+  severity: critical
+
+actions:
+  - revoke_token
+  - block_ip
+  - force_logout
+  - alert_soc
+  - page_oncall
+  - snapshot_state
+
+compliance:
+  - NIST_CSF:RS.MI-2
+  - ISO_27001:A.9.4.2
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+
+---
+# ============================================================
+# HOLLOW_PURPLE Policy: MFA Posture — No MFA Login
+# ============================================================
+
+name: no_mfa_high_risk_login
+version: "2.0"
+enabled: true
+priority: 20
+description: |
+  Any console login without MFA from a high-risk actor
+  triggers step-up authentication enforcement.
+tags:
+  - mfa
+  - authentication
+scope: global
+
+condition:
+  action: ConsoleLogin
+  risk_score: ">0.50"
+
+actions:
+  - require_mfa_reauthentication
+  - enable_step_up_auth
+  - notify_identity_owner
+  - increase_monitoring
+
+compliance:
+  - NIST_CSF:PR.AC-7
+  - CIS_Control_6
+  - ISO_27001:A.9.4.2
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+
+---
+# ============================================================
+# HOLLOW_PURPLE Policy: AWS Service Account Key Creation
+# ============================================================
+
+name: aws_service_account_key_creation
+version: "2.0"
+enabled: true
+priority: 12
+description: |
+  Any new access key created by a service account on AWS
+  is flagged for review. Service accounts should use roles, not keys.
+tags:
+  - aws
+  - access_key
+  - service_account
+scope: aws
+
+condition:
+  action: CreateAccessKey
+  actor_type: service_account
+
+actions:
+  - alert_soc
+  - notify_identity_owner
+  - increase_monitoring
+  - add_to_watchlist
+
+compliance:
+  - CIS_AWS_Foundations:1.4
+  - NIST_CSF:PR.AC-1
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+
+---
+# ============================================================
+# HOLLOW_PURPLE Policy: Azure Global Admin Assignment
+# ============================================================
+
+name: azure_global_admin_assignment
+version: "2.0"
+enabled: true
+priority: 2
+description: |
+  Any assignment of Global Administrator role in Azure Entra ID
+  triggers immediate critical alert and incident creation.
+tags:
+  - azure
+  - admin_assignment
+  - entra_id
+scope: azure
+
+condition:
+  action: "regex:.*roleAssignments.*write"
+  resource: "regex:.*globalAdmin.*|.*Global Administrator.*"
+
+actions:
+  - alert_soc
+  - page_oncall
+  - create_incident_ticket
+  - snapshot_state
+  - log_forensic
+  - add_to_watchlist
+
+compliance:
+  - CIS_Azure_Foundations:1.21
+  - NIST_CSF:PR.AC-4
+  - ISO_27001:A.9.2.3
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"

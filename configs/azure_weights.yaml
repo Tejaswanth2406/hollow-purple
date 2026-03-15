@@ -1,0 +1,158 @@
+# ============================================================
+# HOLLOW_PURPLE — Azure Cloud Configuration v2.0
+# Inherits and overrides default.yaml for Azure environments.
+# Tuned for Entra ID, RBAC, Defender, and Key Vault.
+# ============================================================
+
+cloud_provider: azure
+inherits: default.yaml
+
+# ------------------------------------------------------------
+# Risk Engine — Azure-tuned weights
+# Azure AD (Entra ID) privilege abuse is the dominant vector.
+# Drift elevated because Azure sign-in patterns are very regular.
+# ------------------------------------------------------------
+risk_engine:
+
+  weights:
+    drift:        0.27   # ↑ Entra ID sign-in patterns are highly regular
+    entropy:      0.23
+    privilege:    0.32   # ↑ RBAC role assignments are high-risk
+    graph_risk:   0.18   # ↓ Azure graph is less dense than AWS IAM
+
+  privilege_risk_levels:
+    global_admin:              0.98   # Entra ID Global Administrator
+    privileged_role_admin:     0.95
+    security_admin:            0.85
+    subscription_owner:        0.90
+    subscription_contributor:  0.65
+    subscription_reader:       0.20
+    user_access_admin:         0.88   # Can grant any role
+    application_admin:         0.80
+    cloud_app_admin:           0.75
+    exchange_admin:            0.70
+    sharepoint_admin:          0.65
+    intune_admin:              0.65
+    key_vault_admin:           0.85
+    key_vault_secrets_officer: 0.80
+
+  # PIM (Privileged Identity Management) activation: always flag
+  pim_activation_risk_multiplier: 1.3
+
+# ------------------------------------------------------------
+# Azure-Specific Detection
+# ------------------------------------------------------------
+azure_specific:
+
+  enabled_services:
+    - activity_log
+    - entra_id
+    - defender
+    - keyvault
+
+  # High-value ARM operations
+  high_value_operations:
+    - Microsoft.Authorization/roleAssignments/write
+    - Microsoft.Authorization/roleAssignments/delete
+    - Microsoft.Authorization/roleDefinitions/write
+    - Microsoft.Authorization/policyAssignments/write
+    - Microsoft.Authorization/elevateAccess/action
+    - Microsoft.KeyVault/vaults/secrets/read
+    - Microsoft.KeyVault/vaults/secrets/write
+    - Microsoft.KeyVault/vaults/keys/read
+    - Microsoft.KeyVault/vaults/accessPolicies/write
+    - Microsoft.Compute/virtualMachines/runCommand/action
+    - Microsoft.Compute/virtualMachines/extensions/write
+    - Microsoft.Storage/storageAccounts/listKeys/action
+    - Microsoft.Storage/storageAccounts/regenerateKey/action
+    - Microsoft.Directory/users/password/update
+    - Microsoft.Directory/servicePrincipals/credentials/update
+    - Microsoft.Directory/applications/credentials/update
+    - microsoft.aad/register
+    - Microsoft.ManagedIdentity/userAssignedIdentities/assign/action
+
+  # Resources treated as crown jewels on Azure
+  sensitive_resources:
+    - /subscriptions/*/resourceGroups/production*
+    - /subscriptions/*/providers/Microsoft.KeyVault/vaults/*
+    - /subscriptions/*/providers/Microsoft.Sql/servers/production*
+    - /subscriptions/*/providers/Microsoft.Storage/storageAccounts/*prod*
+    - /tenants/*/providers/Microsoft.aadiam
+
+  # Azure escalation patterns
+  escalation_patterns:
+    - add_role_assignment
+    - create_service_principal
+    - add_application_credentials
+    - elevate_access
+    - pim_role_activation
+    - add_user_to_privileged_group
+
+  # Trusted tenants (partner / federated)
+  trusted_tenant_ids: []
+  monitored_subscription_ids: []
+  tenant_id: ""
+
+  # Entra ID sign-in risk thresholds (from Identity Protection)
+  entra_risk_map:
+    high:   critical
+    medium: high
+    low:    medium
+    none:   info
+
+  # MFA enforcement: alert if sign-in succeeds without MFA
+  alert_on_no_mfa: true
+
+  # Conditional Access policy violations
+  ca_violation_alert: true
+
+# ------------------------------------------------------------
+# Graph Analysis — Azure Crown Jewels
+# ------------------------------------------------------------
+graph_analysis:
+  max_attack_depth:   7
+  blast_radius_depth: 5
+
+  crown_jewel_nodes:
+    - production_subscription
+    - entra_id_tenant_root
+    - global_admin_role
+    - payment_database_server
+    - key_vault_prod
+    - production_storage_account
+
+# ------------------------------------------------------------
+# Baseline Engine — Azure tuning
+# ------------------------------------------------------------
+baseline_engine:
+  observation_window_days: 30
+  minimum_events_required:  60   # ↑ Azure produces verbose sign-in logs
+
+# ------------------------------------------------------------
+# Pattern Detection — Azure tuning
+# ------------------------------------------------------------
+pattern_detection:
+  # Azure PIM activation spree
+  pim_activation_burst_threshold: 3     # N activations in 1 hour
+  pim_activation_window_sec: 3600
+
+  # Service principal credential rotation
+  sp_credential_change_alert: true
+
+  # Impossible travel for Entra ID sign-ins
+  impossible_travel_kmh:    900
+  entra_geo_check_enabled:  true
+
+# ------------------------------------------------------------
+# Compliance
+# ------------------------------------------------------------
+compliance:
+  active_frameworks:
+    - NIST_CSF
+    - CIS_Azure_Foundations
+    - Microsoft_Cloud_Security_Benchmark
+    - SOC2
+    - ISO_27001
+    - PCI_DSS
+    - GDPR
+    - HIPAA

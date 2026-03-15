@@ -1,0 +1,38 @@
+# ============================================================
+# HOLLOW_PURPLE Policy: High Risk Identity Block
+# Triggers on any identity whose composite risk score exceeds
+# the critical threshold. Revokes tokens and isolates.
+# ============================================================
+
+name: high_risk_identity_block
+version: "2.0"
+enabled: true
+priority: 10
+description: |
+  Block any identity with a risk score exceeding 0.85.
+  Triggered by composite risk engine scoring across all signals.
+tags:
+  - risk_score
+  - identity
+  - critical_response
+compliance:
+  - NIST_CSF:RS.MI-1
+  - ISO_27001:A.16.1.5
+  - CIS_Control_6
+scope: global
+
+condition:
+  risk_score: ">0.85"
+
+actions:
+  - revoke_token
+  - force_logout
+  - isolate_identity
+  - alert_soc
+  - page_oncall
+  - snapshot_state
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+  review_date: "2025-07-01"

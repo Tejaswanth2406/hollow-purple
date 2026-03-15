@@ -1,0 +1,148 @@
+# ============================================================
+# HOLLOW_PURPLE — GCP Cloud Configuration v2.0
+# Inherits and overrides default.yaml for GCP environments.
+# Tuned for service account abuse, IAM bindings, and SCC.
+# ============================================================
+
+cloud_provider: gcp
+inherits: default.yaml
+
+# ------------------------------------------------------------
+# Risk Engine — GCP-tuned weights
+# Service account key creation is the primary compromise vector.
+# Graph risk elevated because GCP IAM uses binding-style grants.
+# ------------------------------------------------------------
+risk_engine:
+
+  weights:
+    drift:        0.22   # ↓ GCP service accounts act consistently
+    entropy:      0.22
+    privilege:    0.36   # ↑ IAM bindings are the attack surface
+    graph_risk:   0.20
+
+  privilege_risk_levels:
+    project_owner:                     0.95
+    project_editor:                    0.70
+    project_viewer:                    0.20
+    folder_admin:                      0.90
+    organization_admin:                0.98
+    iam_security_admin:                0.85
+    service_account_admin:             0.80
+    service_account_key_admin:         0.85
+    storage_admin:                     0.70
+    gke_cluster_admin:                 0.85
+    bigquery_admin:                    0.75
+    cloudsql_admin:                    0.75
+    secretmanager_admin:               0.90
+
+  # Service account key creation is highest-risk GCP action
+  service_account_key_risk_multiplier: 1.8
+
+# ------------------------------------------------------------
+# GCP-Specific Detection
+# ------------------------------------------------------------
+gcp_specific:
+
+  enabled_services:
+    - audit_log
+    - scc
+    - cloud_identity
+
+  # High-value Admin Activity log methods
+  high_value_methods:
+    - google.iam.admin.v1.CreateServiceAccount
+    - google.iam.admin.v1.DeleteServiceAccount
+    - google.iam.admin.v1.CreateServiceAccountKey
+    - google.iam.admin.v1.DeleteServiceAccountKey
+    - google.iam.admin.v1.SetIamPolicy
+    - google.iam.v1.IAMPolicy.SetIamPolicy
+    - google.admin.AdminService.createUser
+    - google.admin.AdminService.deleteUser
+    - google.admin.AdminService.updateUser
+    - storage.buckets.setIamPolicy
+    - cloudresourcemanager.projects.setIamPolicy
+    - cloudresourcemanager.organizations.setIamPolicy
+    - compute.instances.setServiceAccount
+    - iam.serviceAccounts.actAs
+    - secretmanager.versions.access
+
+  # Resources treated as crown jewels by default on GCP
+  sensitive_resources:
+    - //cloudresourcemanager.googleapis.com/organizations/*
+    - //iam.googleapis.com/projects/*/serviceAccounts/*
+    - //secretmanager.googleapis.com/projects/*/secrets/*
+    - //cloudkms.googleapis.com/projects/*/keyRings/*
+    - //bigquery.googleapis.com/projects/*/datasets/production*
+    - //sqladmin.googleapis.com/projects/*/instances/production*
+
+  # Service account signals (prefixes that indicate machine identity)
+  service_account_domain_suffix: .iam.gserviceaccount.com
+
+  # GCP escalation patterns
+  escalation_patterns:
+    - set_iam_policy
+    - create_service_account_key
+    - act_as_service_account
+    - iam_roles_create
+    - iam_roles_update
+    - organization_policy_set
+
+  # SCC finding severity mapping
+  scc_severity_map:
+    CRITICAL: critical
+    HIGH:     high
+    MEDIUM:   medium
+    LOW:      low
+
+  # Projects to monitor (populated per-deployment)
+  monitored_projects: []
+  organization_id: ""
+
+# ------------------------------------------------------------
+# Graph Analysis — GCP Crown Jewels
+# ------------------------------------------------------------
+graph_analysis:
+  max_attack_depth:   7
+  blast_radius_depth: 6
+
+  crown_jewel_nodes:
+    - organization_root
+    - payment_bigquery
+    - production_gke_cluster
+    - production_cloudsql
+    - secret_manager_prod
+    - kms_keyring_prod
+    - billing_account
+
+  # GCP IAM bindings create dense graphs — limit enumeration
+  max_graph_nodes_per_query: 5000
+
+# ------------------------------------------------------------
+# Baseline Engine — GCP tuning
+# ------------------------------------------------------------
+baseline_engine:
+  observation_window_days: 21     # GCP workloads are more consistent
+  minimum_events_required:  40
+
+# ------------------------------------------------------------
+# Pattern Detection — GCP tuning
+# ------------------------------------------------------------
+pattern_detection:
+  # Service account key creation: always treat as high-risk
+  service_account_key_immediate_alert: true
+
+  # Workload Identity Federation abuse (token exchange)
+  wif_abuse_detection: true
+  wif_token_exchange_threshold: 5   # N exchanges per minute
+
+# ------------------------------------------------------------
+# Compliance
+# ------------------------------------------------------------
+compliance:
+  active_frameworks:
+    - NIST_CSF
+    - CIS_GCP_Foundations
+    - Google_Cloud_Security_Foundations
+    - SOC2
+    - ISO_27001
+    - PCI_DSS

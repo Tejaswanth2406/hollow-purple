@@ -1,0 +1,162 @@
+# ============================================================
+# HOLLOW_PURPLE — AWS Cloud Configuration v2.0
+# Inherits and overrides default.yaml for AWS environments.
+# Tuned for IAM, CloudTrail, GuardDuty, and multi-account.
+# ============================================================
+
+cloud_provider: aws
+inherits: default.yaml
+
+# ------------------------------------------------------------
+# Risk Engine — AWS-tuned weights
+# IAM privilege abuse is the dominant attack vector on AWS.
+# Privilege weight increased; drift slightly reduced.
+# ------------------------------------------------------------
+risk_engine:
+
+  weights:
+    drift:        0.20   # ↓ from 0.30 (less weight on time-of-day signals)
+    entropy:      0.20   # ↓ from 0.25
+    privilege:    0.40   # ↑ from 0.25 (IAM is the crown of AWS attacks)
+    graph_risk:   0.20   # = unchanged
+
+  # AWS-specific privilege risk levels (maps to IAM policy/role names)
+  privilege_risk_levels:
+    iam_admin:                  0.95
+    iam_power_user:             0.75
+    iam_security_audit:         0.60
+    iam_read_only:              0.20
+    ec2_instance_profile_admin: 0.80
+    lambda_admin:               0.75
+    s3_full_access:             0.70
+    sts_assume_role:            0.65
+
+  # STS AssumeRole is the primary escalation path on AWS
+  assume_role_risk_multiplier: 1.5
+
+# ------------------------------------------------------------
+# AWS-Specific Detection
+# ------------------------------------------------------------
+aws_specific:
+
+  # Services to collect from (used by AWSCollector)
+  enabled_services:
+    - cloudtrail
+    - guardduty
+    - securityhub
+    - iam_analyzer
+    - cloudwatch
+
+  # Regions to collect from (priority order)
+  regions:
+    - us-east-1
+    - us-west-2
+    - eu-west-1
+    - ap-southeast-1
+
+  # High-value CloudTrail actions that always trigger enrichment
+  high_value_actions:
+    - AssumeRole
+    - AssumeRoleWithWebIdentity
+    - AssumeRoleWithSAML
+    - CreateRole
+    - DeleteRole
+    - AttachRolePolicy
+    - DetachRolePolicy
+    - PutRolePolicy
+    - DeleteRolePolicy
+    - CreateUser
+    - DeleteUser
+    - CreateAccessKey
+    - DeleteAccessKey
+    - UpdateAccessKey
+    - CreateLoginProfile
+    - UpdateLoginProfile
+    - DeactivateMFADevice
+    - ConsoleLogin
+    - SwitchRole
+    - GetSessionToken
+    - CreatePolicyVersion
+    - SetDefaultPolicyVersion
+    - PassRole
+    - UpdateAssumeRolePolicy
+
+  # Resources treated as crown jewels by default on AWS
+  sensitive_resources:
+    - arn:aws:iam::*:root               # Root account
+    - arn:aws:secretsmanager:*          # Secrets Manager
+    - arn:aws:kms:*                     # KMS keys
+    - arn:aws:rds:*:*:db:production*    # Production RDS
+    - arn:aws:s3:::*-prod-*             # Production S3 buckets
+    - arn:aws:ec2:*:*:instance/*prod*   # Production EC2
+
+  # IAM escalation patterns detected by pattern engine
+  escalation_patterns:
+    - assume_role
+    - attach_policy
+    - create_access_key
+    - create_policy_version
+    - set_default_policy_version
+    - pass_role
+    - update_assume_role_policy
+
+  # Cross-account role assumption: flag if trust policy allows external account
+  cross_account_trust_alert: true
+  trusted_account_ids: []         # Populate with known-safe account IDs
+
+  # GuardDuty finding severity mapping to HP severity
+  guardduty_severity_map:
+    critical: critical
+    high:     high
+    medium:   medium
+    low:      low
+
+# ------------------------------------------------------------
+# Graph Analysis — AWS Crown Jewels
+# ------------------------------------------------------------
+graph_analysis:
+  max_attack_depth:   8       # ↑ AWS has deeper IAM chains
+  blast_radius_depth: 6
+
+  crown_jewel_nodes:
+    - arn:aws:iam::*:root
+    - production_vpc
+    - payment_database
+    - secrets_manager
+    - kms_key_prod
+    - production_rds
+    - billing_account
+    - cloudtrail_log_bucket   # Attackers often target audit logs
+
+  # IAM path hops that indicate escalation (chain length triggers)
+  escalation_chain_sensitivity: high
+
+# ------------------------------------------------------------
+# Baseline Engine — AWS tuning
+# ------------------------------------------------------------
+baseline_engine:
+  observation_window_days: 14   # ↓ AWS environments change faster
+  minimum_events_required:  30  # ↓ lower minimum for sparse log accounts
+
+# ------------------------------------------------------------
+# Pattern Detection — AWS tuning
+# ------------------------------------------------------------
+pattern_detection:
+  # STS token abuse: shorter window for cloud tokens
+  ip_window_seconds:       60    # ↓ from 120 (AWS tokens expire faster)
+  multi_ip_threshold:       2    # ↑ sensitivity: 2 IPs = suspicious for STS
+
+  # IAM role velocity: AWS accounts may have many roles
+  role_velocity_threshold:  6    # ↑ from 4 (more roles is normal on AWS)
+
+# ------------------------------------------------------------
+# Compliance — AWS-specific frameworks
+# ------------------------------------------------------------
+compliance:
+  active_frameworks:
+    - NIST_CSF
+    - CIS_AWS_Foundations
+    - AWS_Well_Architected_Security
+    - SOC2
+    - PCI_DSS
+    - ISO_27001

@@ -1,0 +1,224 @@
+# ============================================================
+# HOLLOW_PURPLE — Global Default Configuration v2.0
+# Applies to all cloud providers unless overridden.
+# ============================================================
+
+system:
+  name: hollow_purple
+  version: "2.0.0"
+  environment: production           # production | staging | development
+  region: global
+  log_level: INFO                   # DEBUG | INFO | WARNING | ERROR
+  timezone: UTC
+  instance_id: ""                   # Set per-deployment via env var HP_INSTANCE_ID
+
+# ------------------------------------------------------------
+# Risk Engine
+# ------------------------------------------------------------
+risk_engine:
+
+  # Composite risk score is a weighted sum of these signals [0.0–1.0]
+  weights:
+    drift:        0.30   # Behavioral baseline deviation
+    entropy:      0.25   # Shannon entropy of action distribution
+    privilege:    0.25   # Privilege level of resource/role accessed
+    graph_risk:   0.20   # Graph-derived risk (path depth, centrality)
+
+  # Anomaly score fusion: above this threshold, severity is upgraded to CRITICAL
+  anomaly_critical_upgrade: 0.90
+
+  # Baseline drift sensitivity
+  baseline_drift_threshold:  0.35
+  entropy_threshold:          2.0
+  velocity_spike_multiplier:  3.0   # N× normal rate triggers velocity alert
+
+  # Score decay — risk scores decay over time toward 0 if no new signals
+  score_decay_enabled:       true
+  score_half_life_hours:     24
+
+# ------------------------------------------------------------
+# Alert Severity Thresholds
+# ------------------------------------------------------------
+alerts:
+  critical_threshold: 0.85
+  high_threshold:     0.65
+  medium_threshold:   0.40
+  low_threshold:      0.15
+
+  # Dedup: suppress re-alerting for same fingerprint within this window
+  dedup_window_seconds: 30
+
+  # Max alerts emitted per actor per minute (circuit-breaker for alert storms)
+  per_actor_rate_limit: 20
+
+  # Alert routing
+  routing:
+    critical: [siem, pagerduty, slack]
+    high:     [siem, slack]
+    medium:   [siem]
+    low:      []
+
+# ------------------------------------------------------------
+# Graph Analysis
+# ------------------------------------------------------------
+graph_analysis:
+  max_attack_depth:      6
+  blast_radius_depth:    5
+  k_shortest_paths:      5      # Top-K paths returned by AttackPathEngine
+  choke_point_threshold: 0.50   # % of paths a node must appear in to be a choke point
+
+  # Cache TTL for computed paths (seconds)
+  path_cache_ttl_seconds: 300
+
+  # Node risk heuristic weights
+  node_risk_weights:
+    admin:       1.0
+    elevated:    0.75
+    normal:      0.40
+    low:         0.10
+    crown_jewel: 1.0
+
+  # Crown jewel auto-discovery signals (substring match on resource names)
+  crown_jewel_signals:
+    - prod-db
+    - production-db
+    - secret
+    - kms
+    - billing
+    - financial
+    - pci
+    - hipaa
+    - admin-role
+    - root
+    - master
+    - private-key
+    - certificate
+    - password-store
+    - vault
+    - credentials
+    - payments
+    - customer-data
+    - pii
+
+# ------------------------------------------------------------
+# Baseline Engine
+# ------------------------------------------------------------
+baseline_engine:
+  observation_window_days:  30
+  minimum_events_required:  50
+  anomaly_z_score_threshold: 3.0   # Z-score above this triggers off-hours alert
+
+  # Exponential moving average coefficient for anomaly signal projection
+  ema_alpha: 0.30
+
+  # Action rarity: frequency below this is considered anomalous
+  rare_action_threshold_pct: 1.0
+
+# ------------------------------------------------------------
+# Pattern Detection
+# ------------------------------------------------------------
+pattern_detection:
+  # Lateral movement
+  role_crowd_threshold:       5    # Distinct actors on same role within window
+  role_velocity_threshold:    4    # Distinct roles per actor within window
+  account_hop_threshold:      3    # Distinct accounts per actor within window
+  velocity_window_seconds:    300  # 5-minute sliding window
+
+  # Token abuse
+  multi_ip_threshold:         3    # Distinct IPs per token
+  ip_window_seconds:          120  # 2-minute IP window
+  impossible_travel_kmh:      900  # Max credible travel speed
+  high_freq_threshold:        30   # Requests per token per 60s
+  credential_stuffing_threshold: 10  # Distinct tokens per IP per 60s
+
+  # Dormant identity
+  dormancy_threshold_days:    30
+  off_hours_z_score:          3.0
+  scope_explosion_ratio:      3.0  # Resource-type count growth multiplier
+
+  # Privilege chain
+  deep_chain_threshold:       5    # Min hops for deep chain alert
+  chain_acceleration_factor:  2.0  # Depth multiplier in window that triggers alert
+  chain_window_seconds:       300
+
+# ------------------------------------------------------------
+# Ingestion
+# ------------------------------------------------------------
+ingestion:
+  queue_max_size:       10000
+  worker_count:         8
+  batch_size:           100
+  batch_max_age_sec:    5.0
+  rate_limit_default:   1000     # events/sec global default
+  rate_limit_burst:     2000
+
+  # Backpressure thresholds (fraction of queue capacity)
+  backpressure:
+    yellow: 0.50
+    red:    0.80
+    critical: 0.95
+
+  # Deduplication
+  dedup_ttl_seconds:    300
+  near_dup_window_sec:  10
+
+# ------------------------------------------------------------
+# State Machine
+# ------------------------------------------------------------
+state:
+  snapshot_interval_events: 500
+  max_version_history:      100
+  snapshot_compress:        true
+  snapshot_persist:         false     # Enable for forensic-grade deployments
+  snapshot_dir:             /tmp/hollow_purple_snapshots
+  snapshot_max_keep:        20
+
+# ------------------------------------------------------------
+# Mahoragha Defense Engine
+# ------------------------------------------------------------
+mahoragha:
+  enable_adversarial_simulation: true
+  enable_autonomous_defense:     true
+  simulation_depth:              5
+
+  # Autonomous response cooldown per actor (prevent action flooding)
+  response_cooldown_seconds: 60
+
+  # Confidence threshold to trigger autonomous action (vs. alert-only)
+  autonomous_action_threshold: 0.85
+
+  # Dry-run: log actions but don't execute them
+  dry_run: false
+
+# ------------------------------------------------------------
+# Policy Engine
+# ------------------------------------------------------------
+policy_engine:
+  policy_dirs:
+    - policies/
+    - policies/cloud/
+    - policies/compliance/
+  hot_reload_enabled:     true
+  hot_reload_interval_sec: 30
+  max_violations_per_event: 10
+
+# ------------------------------------------------------------
+# Telemetry & Observability
+# ------------------------------------------------------------
+telemetry:
+  metrics_interval_seconds: 10
+  tracing_enabled:          true
+  tracing_sample_rate:      1.0    # 1.0 = 100% sampling
+  prometheus_enabled:       true
+  prometheus_port:          9090
+  healthcheck_port:         8080
+
+# ------------------------------------------------------------
+# Compliance Frameworks (informational — used by policy engine)
+# ------------------------------------------------------------
+compliance:
+  active_frameworks:
+    - NIST_CSF
+    - ISO_27001
+    - SOC2
+    - CIS_Benchmarks

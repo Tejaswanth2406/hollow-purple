@@ -1,0 +1,67 @@
+# ============================================================
+# HOLLOW_PURPLE Policy: Privilege Escalation Response
+# Fires on any detected privilege escalation event.
+# ============================================================
+
+name: privilege_escalation_response
+version: "2.0"
+enabled: true
+priority: 5
+description: |
+  Respond to confirmed privilege escalation events.
+  Revokes the assumed role token, disables the access key used,
+  requires MFA re-authentication, and creates an incident ticket.
+tags:
+  - privilege_escalation
+  - iam
+  - critical_response
+compliance:
+  - NIST_CSF:PR.AC-4
+  - NIST_CSF:DE.CM-3
+  - ISO_27001:A.9.2.3
+  - CIS_Control_5
+scope: global
+
+condition:
+  alert_type: "regex:privilege_escalation.*"
+
+actions:
+  - revoke_token
+  - disable_access_key
+  - require_mfa_reauthentication
+  - alert_soc
+  - create_incident_ticket
+  - log_forensic
+  - add_to_watchlist
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
+  review_date: "2025-07-01"
+
+---
+
+name: privilege_escalation_medium_watch
+version: "2.0"
+enabled: true
+priority: 50
+description: |
+  Lighter-touch policy for medium-severity escalation signals.
+  Increases monitoring and notifies the identity owner.
+tags:
+  - privilege_escalation
+  - monitoring
+scope: global
+
+condition:
+  alert_type: "regex:privilege_escalation.*"
+  risk_score: "between:0.50:0.84"
+
+actions:
+  - increase_monitoring
+  - notify_identity_owner
+  - add_to_watchlist
+
+metadata:
+  author: hollow_purple_core
+  created_at: "2025-01-01"
