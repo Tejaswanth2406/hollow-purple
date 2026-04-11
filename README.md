@@ -1,59 +1,107 @@
-# Hollow Purple
+Hollow Purple
 
-Deterministic Intelligence Engine for Event-Driven Systems
-Hollow Purple is a deterministic intelligence engine designed for high-integrity event processing, system observability, and state reconstruction.
+Adaptive Cloud Identity Attack Detection Platform
 
-The system captures events, stores them in a tamper-evident log, builds relationship graphs, and enables deterministic replay of system state at any point in time.
+Hollow Purple is an advanced cybersecurity analysis platform designed to detect complex identity-based attacks in cloud environments. The system continuously ingests events, builds temporal identity graphs, models baseline behavior, and detects anomalous activity such as privilege escalation, lateral movement, and token abuse.
 
-This architecture ensures transparency, traceability, and auditability across complex systems.
+The platform is built as a modular distributed system with a strong focus on security, verifiability, and deterministic state reconstruction.
 
 ---
 
-## Backend Framework
+## Architecture Overview
 
-The backend is built using **FastAPI**, providing:
+Hollow Purple operates through multiple coordinated subsystems:
 
-* High-performance async APIs
-* Automatic OpenAPI documentation
-* Strong typing and validation
-* Scalable microservice architecture
+1. Ingestion Pipeline
+
+   * Collects identity and activity events from multiple sources
+   * Performs validation, deduplication, and normalization
+   * Provides high-throughput event streaming
+
+2. Graph Engine
+
+   * Constructs a dynamic identity interaction graph
+   * Maintains temporal relationships between entities
+   * Enables path analysis for attack detection
+
+3. Baseline Engine
+
+   * Learns normal behavior patterns for identities and services
+   * Detects behavioral drift and abnormal activity
+
+4. Attack Pattern Detection
+
+   * Privilege escalation detection
+   * Lateral movement analysis
+   * Token abuse detection
+
+5. **Risk Engine**
+
+   * Aggregates signals from multiple detectors
+   * Produces a unified risk score for entities and events
+
+6. State Snapshot & Replay
+
+   * Deterministic state reconstruction
+   * Historical replay for forensic analysis
+
+7. Integrity Verification System
+
+   * Merkle-based event verification
+   * Tamper-evident audit trail
+
+---
+
+## Core Features
+
+* High-throughput event ingestion
+* Temporal identity graph modeling
+* Behavior baseline modeling
+* Attack path discovery
+* Deterministic replay engine
+* Tamper-evident event logs
+* Modular micro-service architecture
+* Distributed deployment ready
+
+---
+
+## Project Structure
+
+```
+HOLLOW_PURPLE/
+│
+├── api/                # API layer and service endpoints
+├── ingestion/          # Event ingestion pipeline
+├── graph/              # Graph construction and analysis
+├── engine/             # Detection and orchestration engine
+├── baseline/           # Behavioral baseline models
+├── patterns/           # Attack pattern detection modules
+├── projections/        # Risk projection and scoring
+├── storage/            # Data persistence layer
+├── state/              # State management
+├── configs/            # System configuration
+├── bootstrap/          # System startup controller
+├── MAHORAGHA/          # Integrity verification system
+├── scripts/            # Utility scripts
+├── tests/              # System test suite
+│
+├── main.py             # Platform entrypoint
+├── main.env            # System configuration
+└── requirements.txt
+```
 
 ---
 
 ## Installation
 
-### 1. Clone the repository
+Clone the repository:
 
 ```bash
 git clone https://github.com/Tejaswanth2406/hollow-purple.git
 cd hollow-purple
 ```
 
----
-
-### 2. Create virtual environment
-
-```bash
-python -m venv venv
-```
-
-Activate environment
-
-Linux / macOS:
-
-```bash
-source venv/bin/activate
-```
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
----
-
-### 3. Install dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -61,69 +109,88 @@ pip install -r requirements.txt
 
 ---
 
-## Running the Backend
+## Configuration
 
-Start the API server:
+The system uses a centralized environment configuration file.
+
+```
+main.env
+```
+
+This file defines:
+
+* API configuration
+* ingestion pipeline limits
+* graph engine limits
+* baseline parameters
+* risk scoring thresholds
+* system telemetry
+
+---
+
+## Running the Platform
+
+Start the Hollow Purple kernel:
 
 ```bash
-uvicorn api.main:app --reload
+python main.py
 ```
 
-Server will start at:
+The platform will automatically start:
 
-```
-http://127.0.0.1:8000
-```
-
-Interactive API docs:
-
-```
-http://127.0.0.1:8000/docs
-```
+* ingestion pipeline
+* graph engine
+* detection engine
+* API server
+* health monitoring
+* metrics collection
 
 ---
 
-## API Endpoints
+## Development
 
-| Endpoint               | Description                   |
-| ---------------------- | ----------------------------- |
-| POST /events           | Ingest system events          |
-| GET /replay/{time}     | Reconstruct system state      |
-| GET /graph/entity/{id} | Retrieve entity relationships |
-| GET /alerts            | Fetch anomaly alerts          |
-| GET /health            | System health check           |
-
----
-
-## Testing
-
-Run unit tests with:
+Run tests:
 
 ```bash
 pytest
 ```
 
----
+Lint the code:
 
-## Future Roadmap
-
-### Hollow Purple v3
-
-* AI anomaly detection
-* Behavioral modeling
-* Risk prediction engine
-* Vector embeddings for event patterns
-
-### Hollow Purple v4
-
-* Self-evolving intelligence system
-* Autonomous anomaly response
-* Adaptive system learning
+```bash
+pylint .
+```
 
 ---
 
-## Author
+## Security
 
-Tejaswanth2406
+Hollow Purple includes a tamper-evident event verification system.
+All events can be cryptographically verified through the integrity subsystem.
 
-Built for high-integrity deterministic intelligence systems.
+If you discover a vulnerability, please open a responsible disclosure through GitHub Issues.
+
+---
+
+## Roadmap
+
+Planned features include:
+
+* distributed consensus mode
+* multi-cluster deployment
+* advanced identity risk modeling
+* attack simulation framework
+* visualization dashboard
+
+---
+
+## Contributing
+
+Contributions are welcome.
+Please open an issue before submitting large changes to discuss design proposals.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
