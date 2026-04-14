@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hollow Purple · Capabilities</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=UnifrakturCook:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #090c10;
+            --text: #f4efe1;
+            --text-muted: #b0a68f;
+            --accent: #ba7d3c;
+            --border: rgba(255, 255, 255, 0.08);
+            --font-display: 'Cinzel Decorative', serif;
+            --font-poster: 'UnifrakturCook', cursive;
+            --font-sans: 'DM Sans', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, rgba(186, 125, 60, 0.12), transparent 20%),
+                        linear-gradient(150deg, rgba(255,255,255,0.03), transparent 24%),
+                        linear-gradient(180deg, #090c10 0%, #05080d 100%);
+            color: var(--text);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+        }
+
+        .page-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 40px 28px;
+        }
+
+        .brand-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 7vw, 5rem);
+            line-height: 0.92;
+            letter-spacing: -0.04em;
+            margin-bottom: 12px;
+        }
+
+        .brand-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .hero-card {
+            margin-top: 26px;
+            border-radius: 30px;
+            padding: 40px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 34px 80px rgba(0,0,0,0.24);
+        }
+
+        .hero-card p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.9;
+            max-width: 54rem;
+        }
+
+        .capability-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 34px;
+        }
+
+        .capability-card {
+            padding: 26px;
+            border-radius: 26px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .capability-card h3 {
+            font-family: var(--font-poster);
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #f7f2df;
+        }
+
+        .capability-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.75;
+        }
+
+        .capability-feature {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--accent);
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 36px;
+            color: var(--accent);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            letter-spacing: 0.16em;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div class="brand-subtitle">Capabilities</div>
+        <div class="brand-title">What Hollow Purple Can Do for You</div>
+
+        <section class="hero-card">
+            <p>From full-spectrum identity analysis and adaptive policy enforcement to deception-driven attacker containment, Hollow Purple is built to make every security event look and feel like a directed scene. Use this page to understand the platform's major capabilities before diving back into the visual graph and active dashboard.</p>
+        </section>
+
+        <div class="capability-grid">
+            <article class="capability-card">
+                <div class="capability-feature">Graph Intelligence</div>
+                <h3>Exposed Attack Paths</h3>
+                <p>Reveal lateral movement, privilege escalation, and asset exposure in a unified identity-resource graph that highlights risk in motion.</p>
+            </article>
+            <article class="capability-card">
+                <div class="capability-feature">Autonomous Policy</div>
+                <h3>Real-Time Enforcement</h3>
+                <p>Deploy policies that adapt to changing threat conditions, automatically blocking unsafe behavior and enforcing zero trust decisions.</p>
+            </article>
+            <article class="capability-card">
+                <div class="capability-feature">AI Strategy</div>
+                <h3>Threat Recommendations</h3>
+                <p>Leverage reasoning models to translate raw indicators into prioritized action plans, incident narratives, and mitigation playbooks.</p>
+            </article>
+            <article class="capability-card">
+                <div class="capability-feature">Deception Ops</div>
+                <h3>Safe Redirection</h3>
+                <p>Confuse and reroute adversaries into monitored, hardened deception environments while preserving your real estate.</p>
+            </article>
+            <article class="capability-card">
+                <div class="capability-feature">Detection</div>
+                <h3>Drift & Anomaly Analysis</h3>
+                <p>Spot anomalous identity and access patterns through behavioral baselines, temporal risk scoring, and drift detection.</p>
+            </article>
+            <article class="capability-card">
+                <div class="capability-feature">Observability</div>
+                <h3>Holistic Monitoring</h3>
+                <p>Track health, policy compliance, event volume, and attack progression with a single, cinematic operational dashboard.</p>
+            </article>
+        </div>
+
+        <a class="back-link" href="index.html">← Back to Hollow Purple</a>
+    </div>
+</body>
+</html>

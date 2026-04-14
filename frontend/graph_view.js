@@ -37,16 +37,16 @@ const GraphView = (() => {
   };
 
   const COLOR = {
-    identity: '#00aaff',
-    resource: '#9d4edd',
-    flagged:  '#ff2d55',
-    drifting: '#ffb300',
-    denied:   'rgba(255,45,85,0.7)',
-    allowed:  'rgba(0,255,136,0.25)',
-    bg:       '#0a0f14',
-    grid:     'rgba(0,255,136,0.03)',
-    label:    'rgba(232,237,242,0.8)',
-    hud:      'rgba(0,255,136,0.5)',
+    identity: '#e0c09a',
+    resource: '#d49a5a',
+    flagged:  '#e66f1e',
+    drifting: '#d78a1d',
+    denied:   'rgba(230,111,30,0.72)',
+    allowed:  'rgba(242,229,210,0.26)',
+    bg:       '#1a1712',
+    grid:     'rgba(230,111,30,0.06)',
+    label:    'rgba(242,229,210,0.88)',
+    hud:      'rgba(230,111,30,0.72)',
   };
 
   const PHYSICS = {
@@ -313,10 +313,10 @@ const GraphView = (() => {
         const mx = (x1 + x2) / 2;
         const my = (y1 + y2) / 2;
         ctx.globalAlpha = 0.9;
-        ctx.fillStyle = '#0a0f14';
+        ctx.fillStyle = '#1a1712';
         ctx.fillRect(mx - 12, my - 7, 24, 14);
-        ctx.fillStyle = e.denied ? '#ff2d55' : '#00ff88';
-        ctx.font = '9px "Share Tech Mono", monospace';
+        ctx.fillStyle = e.denied ? 'rgba(178,58,20,0.9)' : 'rgba(242,229,210,0.95)';
+        ctx.font = '9px "DM Mono", monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(`×${e.count}`, mx, my);
@@ -374,14 +374,14 @@ const GraphView = (() => {
 
       // Type icon
       ctx.fillStyle = baseColor;
-      ctx.font = `${r * 0.75}px "Share Tech Mono"`;
+      ctx.font = `${r * 0.75}px "DM Mono", monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const icon = n.type === 'identity' ? '⬡' : '◈';
       ctx.fillText(icon, n.x, n.y);
 
       // Label
-      ctx.font = '9px "Share Tech Mono", monospace';
+      ctx.font = '9px "DM Mono", monospace';
       ctx.fillStyle = COLOR.label;
       ctx.globalAlpha = isSelected || isHovered ? 1 : 0.7;
       ctx.textAlign = 'center';
@@ -400,7 +400,7 @@ const GraphView = (() => {
       `EDGES ${edges.length}`,
       `TICK ${tickCount}`,
     ];
-    ctx.font = '9px "Share Tech Mono", monospace';
+    ctx.font = '9px "DM Mono", monospace';
     ctx.fillStyle = COLOR.hud;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'bottom';
@@ -559,11 +559,11 @@ const GraphView = (() => {
       <div class="tooltip-label">${node.id}</div>
       <div class="tooltip-row"><span>TYPE</span><span>${(node.type || 'unknown').toUpperCase()}</span></div>
       <div class="tooltip-row"><span>CONNECTIONS</span><span>${edgeCount}</span></div>
-      <div class="tooltip-row"><span>DENIED EDGES</span><span style="color:var(--accent-red)">${denied}</span></div>
+      <div class="tooltip-row"><span>DENIED EDGES</span><span style="color:var(--danger)">${denied}</span></div>
       ${node.trust !== undefined ? `<div class="tooltip-row"><span>TRUST</span><span>${node.trust.toFixed(2)}</span></div>` : ''}
       ${node.sensitivity ? `<div class="tooltip-row"><span>SENSITIVITY</span><span>${node.sensitivity.toUpperCase()}</span></div>` : ''}
-      ${node.flagged  ? `<div class="tooltip-row"><span>STATUS</span><span style="color:var(--accent-red)">FLAGGED</span></div>` : ''}
-      ${node.drifting ? `<div class="tooltip-row"><span>DRIFT</span><span style="color:var(--accent-amber)">ANOMALOUS</span></div>` : ''}
+      ${node.flagged  ? `<div class="tooltip-row"><span>STATUS</span><span style="color:var(--danger)">FLAGGED</span></div>` : ''}
+      ${node.drifting ? `<div class="tooltip-row"><span>DRIFT</span><span style="color:var(--amber)">ANOMALOUS</span></div>` : ''}
     `;
     tip.style.left = `${offsetX}px`;
     tip.style.top  = `${offsetY}px`;

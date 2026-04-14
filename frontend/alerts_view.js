@@ -152,11 +152,11 @@ const AlertsView = (() => {
 
   function getSeverityColor(severity) {
     const map = {
-      critical: 'var(--accent-red)',
-      high:     '#ff6400',
-      medium:   'var(--accent-amber)',
-      low:      'var(--accent-blue)',
-      info:     'var(--text-dim)',
+      critical: 'var(--danger)',
+      high:     'var(--accent-secondary)',
+      medium:   'var(--amber)',
+      low:      'var(--text-3)',
+      info:     'var(--text-2)',
     };
     return map[severity] || map.info;
   }
@@ -183,9 +183,9 @@ const AlertsView = (() => {
     const visible = alertData.filter(a => activeFilter === 'all' || a.severity === activeFilter);
     const critical = alertData.filter(a => a.severity === 'critical').length;
     badge.textContent = `${visible.length}`;
-    badge.style.background = critical > 0 ? 'rgba(255,45,85,0.2)'  : 'var(--bg-elevated)';
-    badge.style.color      = critical > 0 ? 'var(--accent-red)'    : 'var(--text-dim)';
-    badge.style.borderColor= critical > 0 ? 'rgba(255,45,85,0.4)'  : 'var(--border-normal)';
+    badge.style.background = critical > 0 ? 'rgba(178,58,20,0.2)'  : 'var(--surface)';
+    badge.style.color      = critical > 0 ? 'var(--danger)'        : 'var(--text-3)';
+    badge.style.borderColor= critical > 0 ? 'rgba(178,58,20,0.4)'  : 'var(--border)';
   }
 
   // ── Empty state ───────────────────────────────────────────────────────────────
@@ -305,7 +305,7 @@ const AlertsView = (() => {
 
   function flashCriticalAlert(el) {
     el.style.transition = 'background 0.1s';
-    el.style.background = 'rgba(255,45,85,0.12)';
+    el.style.background = 'rgba(178,58,20,0.12)';
     setTimeout(() => { el.style.background = ''; }, 600);
   }
 

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hollow Purple · Introduction</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=UnifrakturCook:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #080b0f;
+            --text: #f4efe1;
+            --text-muted: #b6aa92;
+            --accent: #ba7d3c;
+            --border: rgba(255, 255, 255, 0.08);
+            --font-display: 'Cinzel Decorative', serif;
+            --font-poster: 'UnifrakturCook', cursive;
+            --font-sans: 'DM Sans', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, rgba(186, 125, 60, 0.14), transparent 24%),
+                        radial-gradient(circle at bottom right, rgba(125, 130, 200, 0.11), transparent 28%),
+                        linear-gradient(180deg, #080b0f 0%, #06080c 100%);
+            color: var(--text);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(120deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 28px 28px;
+            opacity: 0.14;
+            pointer-events: none;
+        }
+
+        .page-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 32px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 42px;
+        }
+
+        .brand-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .brand-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .intro-card {
+            border-radius: 32px;
+            padding: 38px 42px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 32px 75px rgba(0,0,0,0.25);
+        }
+
+        .intro-card h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 22px;
+            letter-spacing: -0.04em;
+        }
+
+        .intro-card p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.9;
+            margin-bottom: 24px;
+        }
+
+        .intro-card ul {
+            list-style: none;
+            display: grid;
+            gap: 20px;
+        }
+
+        .intro-card li {
+            display: grid;
+            gap: 10px;
+            padding: 18px 20px;
+            border-radius: 22px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .intro-card h3 {
+            font-family: var(--font-poster);
+            font-size: 1.1rem;
+            color: #f8f2df;
+        }
+
+        .intro-card small {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .hero-links {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .hero-link {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 22px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.06);
+            color: var(--text);
+            font-family: var(--font-mono);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            transition: background 0.25s ease, transform 0.25s ease;
+        }
+
+        .hero-link:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            margin-top: 40px;
+            display: inline-block;
+            color: var(--accent);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            letter-spacing: 0.16em;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <header class="header">
+            <div>
+                <div class="brand-title">Hollow Purple</div>
+                <div class="brand-subtitle">Introduction</div>
+            </div>
+            <a class="hero-link" href="index.html">Back to Dashboard</a>
+        </header>
+
+        <section class="intro-card">
+            <h2>Welcome to the next generation of security orchestration.</h2>
+            <p>Hollow Purple is an autonomous cyber defense platform that blends graph intelligence, policy reasoning, deception, and AI-driven decision making into a unified, cinematic workflow. It reveals attacker journeys, protects identities, and adapts across every layer of your environment.</p>
+            <ul>
+                <li>
+                    <h3>Graph-driven threat visibility</h3>
+                    <small>Discover relationships, paths, and exposure in a dynamic identity-resource graph.</small>
+                </li>
+                <li>
+                    <h3>Autonomous response orchestration</h3>
+                    <small>Let Mahoraga suggest or execute mitigations with ethical guardrails.</small>
+                </li>
+                <li>
+                    <h3>Deception and redirection</h3>
+                    <small>Attract, contain, and study adversaries in hardened decoy environments.</small>
+                </li>
+                <li>
+                    <h3>Continuous policy enforcement</h3>
+                    <small>Enforce zero trust controls, RBAC decisions, and compliance rules automatically.</small>
+                </li>
+            </ul>
+            <div class="hero-links">
+                <a class="hero-link" href="capabilities.html">Read the Capabilities</a>
+                <a class="hero-link" href="index.html#graph-panel">Explore the Graph</a>
+            </div>
+        </section>
+
+        <a class="back-link" href="index.html">← Return to Hollow Purple</a>
+    </div>
+</body>
+</html>

@@ -251,7 +251,7 @@ function setText(id, text, className) {
 function showToast(message, color = 'green', duration = 3000) {
   const container = document.getElementById('toast-container');
   if (!container) return;
-  const colorMap = { green:'var(--accent-green)', red:'var(--accent-red)', amber:'var(--accent-amber)' };
+  const colorMap = { green:'var(--accent)', red:'var(--danger)', amber:'var(--accent-secondary)' };
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.style.setProperty('--toast-color', colorMap[color] || colorMap.green);
@@ -287,9 +287,9 @@ function setConnectionStatus(status) {
   const label = document.getElementById('conn-label');
   if (!dot || !label) return;
   const map = {
-    connecting: { color: 'var(--accent-amber)', text: 'CONNECTING' },
-    live:       { color: 'var(--accent-green)', text: 'LIVE' },
-    error:      { color: 'var(--accent-red)',   text: 'OFFLINE' },
+    connecting: { color: 'var(--amber)', text: 'CONNECTING' },
+    live:       { color: 'var(--accent)', text: 'LIVE' },
+    error:      { color: 'var(--danger)', text: 'OFFLINE' },
   };
   const cfg = map[status] || map.error;
   dot.style.background = cfg.color;
@@ -335,18 +335,18 @@ function updateMetricsView(data) {
   const critEl = document.getElementById('m-critical');
   if (critEl) {
     critEl.textContent = data.critical;
-    critEl.style.color = data.critical > 0 ? 'var(--accent-red)' : 'var(--accent-green)';
+    critEl.style.color = data.critical > 0 ? 'var(--danger)' : 'var(--accent)';
     critEl.style.textShadow = data.critical > 0
-      ? '0 0 20px rgba(255,45,85,0.5)' : '0 0 20px rgba(0,255,136,0.3)';
+      ? '0 0 20px rgba(178,58,20,0.5)' : '0 0 20px rgba(230,111,30,0.25)';
   }
   setText('m-critical-d', data.critical > 0 ? `⚠ Requires attention` : '✓ No critical issues');
 
   const driftEl = document.getElementById('m-drift');
   if (driftEl) {
     driftEl.textContent = data.drift.toFixed(2);
-    const driftColor = data.drift > 0.7 ? 'var(--accent-red)'
-                     : data.drift > 0.4 ? 'var(--accent-amber)'
-                     : 'var(--accent-green)';
+    const driftColor = data.drift > 0.7 ? 'var(--danger)'
+                     : data.drift > 0.4 ? 'var(--amber)'
+                     : 'var(--accent)';
     driftEl.style.color = driftColor;
   }
   setText('m-drift-d', `System drift index`);
@@ -369,19 +369,19 @@ function updateMetricsView(data) {
   const label = document.getElementById('health-label');
   if (badge && label) {
     if (data.critical > 5) {
-      badge.style.borderColor = 'rgba(255,45,85,0.4)';
-      badge.style.background  = 'rgba(255,45,85,0.1)';
-      badge.style.color       = 'var(--accent-red)';
+      badge.style.borderColor = 'rgba(178,58,20,0.4)';
+      badge.style.background  = 'rgba(178,58,20,0.14)';
+      badge.style.color       = 'var(--danger)';
       label.textContent = 'CRITICAL';
     } else if (data.critical > 0 || data.drift > 0.65) {
-      badge.style.borderColor = 'rgba(255,179,0,0.4)';
-      badge.style.background  = 'rgba(255,179,0,0.1)';
-      badge.style.color       = 'var(--accent-amber)';
+      badge.style.borderColor = 'rgba(230,111,30,0.4)';
+      badge.style.background  = 'rgba(230,111,30,0.1)';
+      badge.style.color       = 'var(--amber)';
       label.textContent = 'ELEVATED';
     } else {
-      badge.style.borderColor = 'rgba(0,255,136,0.3)';
-      badge.style.background  = 'rgba(0,255,136,0.07)';
-      badge.style.color       = 'var(--accent-green)';
+      badge.style.borderColor = 'rgba(255,255,255,0.12)';
+      badge.style.background  = 'rgba(255,255,255,0.08)';
+      badge.style.color       = 'var(--text-3)';
       label.textContent = 'NOMINAL';
     }
   }
@@ -433,9 +433,9 @@ function updateDriftBar(score) {
   bar.style.width = `${pct}%`;
   bar.style.setProperty('--pct', String(pct));
   label.textContent = score.toFixed(2);
-  label.style.color = score > 0.7 ? 'var(--accent-red)'
-                    : score > 0.4 ? 'var(--accent-amber)'
-                    : 'var(--accent-green)';
+  label.style.color = score > 0.7 ? 'var(--danger)'
+                    : score > 0.4 ? 'var(--amber)'
+                    : 'var(--accent)';
 }
 
 // ─── Graph loader ─────────────────────────────────────────────────────────────
