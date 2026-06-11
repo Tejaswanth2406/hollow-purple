@@ -1,4 +1,5 @@
-<img width="1366" height="882" alt="image" src="https://github.com/user-attachments/assets/0973ae47-f17f-4f23-a753-639f24b51c1c" />
+<img width="1425" height="460" alt="image" src="https://github.com/user-attachments/assets/84bd924f-f331-4f5f-aca0-24f19fb213f5" />
+
 ```
 
 ## `$ whoami`
