@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "soc_dashboard.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/soc-dashboard", "dest": "/soc_dashboard.html" },
+    { "src": "/soc_dashboard.html", "dest": "/soc_dashboard.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
