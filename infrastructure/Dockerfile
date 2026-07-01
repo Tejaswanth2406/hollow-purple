@@ -65,7 +65,7 @@ except (urllib.error.URLError, ValueError, SystemExit):
 EXPOSE 8000
 
 # Start application
-CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["python", "-m", "uvicorn", "api_gateway:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
 
 # Development stage
 FROM base as development
@@ -97,7 +97,7 @@ USER hollowpurple
 EXPOSE 8000
 
 # Development command
-CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["python", "-m", "uvicorn", "api_gateway:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 # Testing stage
 FROM development as testing
