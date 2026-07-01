@@ -28,6 +28,7 @@ const CONFIG = Object.freeze({
   RETRY_ATTEMPTS:     3,
   RETRY_DELAY_MS:     1_500,
   MAX_ACTIVITY_ITEMS: 80,
+  SEARCH_API_PATH:    '/api/v1/search',
   MOCK_DATA:          true,   // ← flip to false when backend is live
 });
 
@@ -452,7 +453,78 @@ async function loadGraphData() {
   }
   EventBus.emit('graph:updated', data);
 }
+async function runWebSearch(query) {
+  const container = document.getElementById('search-results');
+  if (!container) return;
+  if (!query || !query.trim()) {
+    renderSearchError('Please enter a search query.');
+    return;
+  }
 
+  container.innerHTML = '<div class="alert alert-info">Searching for your query...</div>';
+  try {
+    const url = `${CONFIG.SEARCH_API_PATH}?query=${encodeURIComponent(query)}&limit=3`;
+    const response = await fetch(url, { method: 'GET' });
+    if (!response.ok) {
+      throw new Error(`Search failed: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    renderSearchResults(data);
+  } catch (err) {
+    renderSearchError(err?.message || 'Search failed.');
+  }
+}
+
+function renderSearchResults(data) {
+  const container = document.getElementById('search-results');
+  if (!container) return;
+
+  if (!data?.results?.length) {
+    container.innerHTML = '<div class="alert alert-warning">No search results were found for that query.</div>';
+    return;
+  }
+
+  container.innerHTML = data.results.map(item => {
+    const snippet = item.snippet ? `<p>${escapeHtml(item.snippet)}</p>` : '';
+    const text = item.text ? `<details class="mb-2"><summary>Scraped page text</summary><pre>${escapeHtml(item.text)}</pre></details>` : '';
+    return `
+      <div class="search-result mb-3 p-2 rounded bg-dark text-white">
+        <div class="d-flex justify-content-between align-items-start">
+          <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="h6 mb-1 d-block text-info">${escapeHtml(item.title)}</a>
+          <span class="badge bg-secondary text-uppercase">${escapeHtml(item.source)}</span>
+        </div>
+        ${snippet}
+        ${text}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSearchError(message) {
+  const container = document.getElementById('search-results');
+  if (!container) return;
+  container.innerHTML = `<div class="alert alert-danger">${escapeHtml(message)}</div>`;
+}
+
+function escapeHtml(value) {
+  if (typeof value !== 'string') return '';
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function initSearchBox() {
+  const form = document.getElementById('search-form');
+  if (!form) return;
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const query = document.getElementById('search-query')?.value || '';
+    runWebSearch(query.trim());
+  });
+}
 // ─── Activity feed ────────────────────────────────────────────────────────────
 
 function pushActivityEvent() {
@@ -543,6 +615,8 @@ async function initDashboard() {
 
   // Seed activity feed
   for (let i = 0; i < 8; i++) pushActivityEvent();
+
+  initSearchBox();
 
   // Start background polling
   startRefreshCycles();

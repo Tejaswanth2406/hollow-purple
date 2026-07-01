@@ -22,9 +22,12 @@ import logging
 import time
 from contextlib import asynccontextmanager
 
+from pathlib import Path
+
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from .middleware import (
     AttackDetectionMiddleware,
@@ -38,6 +41,8 @@ from .streaming.alert_stream import router as alert_router
 from .streaming.graph_updates import router as graph_router
 
 logger = logging.getLogger("hollowpurple.api")
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 @asynccontextmanager
@@ -133,7 +138,30 @@ def create_app(
     app.include_router(alert_router, prefix="/stream")
     app.include_router(graph_router, prefix="/stream")
 
+    @app.get("/", include_in_schema=False)
+    async def root_index():
+        index_file = BASE_DIR / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return JSONResponse({"message": "Hollow Purple API is running"})
+
+    @app.get("/health", include_in_schema=False)
+    async def health_probe():
+        return JSONResponse({"status": "healthy", "version": "1.0.0"})
+
+    @app.get("/ready", include_in_schema=False)
+    async def readiness_probe():
+        return JSONResponse({"status": "ready", "version": "1.0.0"})
+
     return app
+
+
+async def start_api_server(host: str = "0.0.0.0", port: int = 8080) -> None:
+    """Start the FastAPI server for enterprise deployment."""
+    app = create_app()
+    config = uvicorn.Config(app, host=host, port=port, log_level="info")
+    server = uvicorn.Server(config)
+    await server.serve()
 
 
 # Entry point for uvicorn: uvicorn api.server:app --reload

@@ -169,6 +169,22 @@ class HealthResponse(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
+class SearchResultItem(BaseModel):
+    title: str
+    url: str
+    snippet: Optional[str] = None
+    source: str
+    text: Optional[str] = None
+
+
+class SearchResponse(BaseModel):
+    query: str
+    provider: str
+    fallback_used: bool = False
+    results: List[SearchResultItem]
+    retrieved_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # ---------------------------------------------------------------------------
 # Alerts
 # ---------------------------------------------------------------------------

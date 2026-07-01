@@ -55,17 +55,19 @@ from .schemas import (
     ReplayResponse,
     RiskQueryRequest,
     RiskQueryResponse,
+    SearchResponse,
     TokenRequest,
     TokenResponse,
 )
-from .services import EventService, ReplayService, RiskService
+from .services import EventService, ReplayService, RiskService, SearchService
 
 router = APIRouter()
 
 # Service singletons (FastAPI DI manages their lifecycle)
-_event_svc  = EventService()
-_risk_svc   = RiskService()
-_replay_svc = ReplayService()
+_event_svc   = EventService()
+_risk_svc    = RiskService()
+_replay_svc  = ReplayService()
+_search_svc  = SearchService()
 
 
 # ---------------------------------------------------------------------------
@@ -218,6 +220,23 @@ async def health():
         uptime_seconds=time.process_time(),
         version="1.0.0",
     )
+
+
+# ---------------------------------------------------------------------------
+# External search / AI enrichment
+# ---------------------------------------------------------------------------
+
+@router.get(
+    "/search",
+    response_model=SearchResponse,
+    summary="Web search with scraping-based enrichment",
+    tags=["search"],
+)
+async def web_search(
+    query: str = Query(..., min_length=3, description="Search phrase to resolve"),
+    limit: int = Query(default=3, ge=1, le=5, description="Number of top pages to scrape"),
+):
+    return await _search_svc.search(query=query, limit=limit)
 
 
 # ---------------------------------------------------------------------------

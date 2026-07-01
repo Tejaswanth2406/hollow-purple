@@ -1,0 +1,239 @@
+version: '3.8'
+
+services:
+  # Main Hollow Purple API service
+  hollow-purple-api:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile
+      target: development
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - HP_API_HOST=0.0.0.0
+      - HP_API_PORT=8000
+      - HP_LOG_LEVEL=INFO
+      - HP_SECURITY_ENABLE_ATTACK_DETECTION=true
+      - HP_SECURITY_ENABLE_AUDIT_TRAIL=true
+      - HP_SECURITY_JWT_SECRET=supersecret
+      - HP_REDIS_HOST=redis
+      - HP_REDIS_PORT=6379
+      - HP_DB_HOST=postgres
+      - HP_DB_PORT=5432
+      - HP_DB_NAME=hollowpurple
+      - HP_DB_USER=postgres
+      - HP_DB_PASSWORD=password
+      - HP_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - HP_NEO4J_URI=bolt://neo4j:7687
+      - HP_NEO4J_USER=neo4j
+      - HP_NEO4J_PASSWORD=password
+    volumes:
+      - ..:/app
+      - /app/__pycache__
+    depends_on:
+      - redis
+      - postgres
+      - kafka
+      - neo4j
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database (Event Store)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: hollowpurple
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Neo4j Graph Database
+  neo4j:
+    image: neo4j:5.15
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4J_PLUGINS: '["graph-data-science"]'
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "password", "MATCH () RETURN count(*) limit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Kafka Message Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_INTERNAL://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Zookeeper (required for Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+
+  # Flink Stream Processor
+  flink-jobmanager:
+    image: flink:1.17.1-scala_2.12
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    volumes:
+      - flink_data:/opt/flink/data
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+
+  flink-taskmanager:
+    image: flink:1.17.1-scala_2.12
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager
+    volumes:
+      - flink_data:/opt/flink/data
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - hollow-purple-api
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+
+  # SOC Dashboard (Static Files)
+  soc-dashboard:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ../soc_dashboard.html:/usr/share/nginx/html/index.html
+      - ./nginx/dashboard.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - hollow-purple-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  neo4j_data:
+  neo4j_logs:
+  flink_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  hollow-purple-network:
+    driver: bridge
