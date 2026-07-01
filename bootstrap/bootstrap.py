@@ -30,8 +30,8 @@ from typing import Callable, Awaitable, Dict, Optional
 from scripts.bootstrap_env import bootstrap, ApplicationContext
 
 from api.server import start_api_server
-from ingestion.orchestrator import start_ingestion_pipeline
-from MAHORAGHA.health import start_health_monitor
+from ingestion.startup import start_ingestion_pipeline
+from MAHORAGHA.startup import start_health_monitor
 
 
 log = logging.getLogger("hp.runtime")
