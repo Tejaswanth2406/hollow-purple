@@ -3,468 +3,500 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HOLLOW PURPLE — Adaptive Cloud Identity Architecture</title>
+<title>Hollow Purple — Autonomous Cloud Identity Defense</title>
+<meta name="description" content="Hollow Purple is an open-source autonomous cyber defense platform that uses AI, deception, and graph intelligence to stop identity-based attacks in real time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --void:#06060a;
-    --panel:#0c0c14;
-    --panel-2:#101018;
-    --line:#1c1c28;
-    --purple:#8b5cf6;
-    --purple-deep:#4c1d95;
-    --purple-dim:#3d2a6b;
-    --cyan:#22d3ee;
-    --amber:#f5a623;
-    --text:#e8e6f0;
-    --muted:#7a7a90;
-    --muted-2:#4d4d5e;
-    --mono:'JetBrains Mono', monospace;
-    --sans:'Inter', sans-serif;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--void);
-    color:var(--text);
-    font-family:var(--sans);
-    line-height:1.6;
-    overflow-x:hidden;
-  }
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  :root {
+    --void:    #06060a;
+    --panel:   #0c0c14;
+    --panel-2: #101018;
+    --line:    #1c1c28;
+    --purple:  #8b5cf6;
+    --purple-deep: #4c1d95;
+    --purple-dim:  #3d2a6b;
+    --cyan:    #22d3ee;
+    --amber:   #f5a623;
+    --green:   #22c55e;
+    --text:    #e8e6f0;
+    --muted:   #7a7a90;
+    --muted-2: #4d4d5e;
+    --mono:    'JetBrains Mono', monospace;
+    --sans:    'Inter', sans-serif;
+    --radius:  6px;
   }
 
-  a{color:inherit;}
-  ::selection{background:var(--purple-deep); color:#fff;}
-
-  /* ---------- NAV ---------- */
-  .nav{
-    position:fixed; top:0; left:0; right:0; z-index:100;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:18px 32px;
-    background:rgba(6,6,10,0.75);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--line);
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    overflow-x: hidden;
   }
-  .nav-brand{
-    font-family:var(--mono); font-weight:700; letter-spacing:0.5px; font-size:14px;
-    display:flex; align-items:center; gap:10px;
-  }
-  .nav-brand .dot{width:8px; height:8px; border-radius:50%; background:var(--purple); box-shadow:0 0 12px var(--purple); animation:pulse 2.4s ease-in-out infinite;}
-  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.3;}}
-  .nav-links{display:flex; gap:28px; font-family:var(--mono); font-size:12px; color:var(--muted);}
-  .nav-links a{text-decoration:none; transition:color .2s;}
-  .nav-links a:hover{color:var(--purple);}
-  .nav-cta{
-    font-family:var(--mono); font-size:12px; padding:8px 16px;
-    border:1px solid var(--purple-dim); border-radius:2px; text-decoration:none;
-    transition:all .2s; white-space:nowrap;
-  }
-  .nav-cta:hover{background:var(--purple); border-color:var(--purple); color:#0a0a12;}
-  @media (max-width:860px){ .nav-links{display:none;} }
-
-  /* ---------- HERO ---------- */
-  .hero{
-    position:relative; height:100vh; min-height:640px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; padding:0 24px;
-    border-bottom:1px solid var(--line);
-  }
-  #flowCanvas{position:absolute; inset:0; width:100%; height:100%; opacity:0.85;}
-  .hero-content{position:relative; z-index:2; max-width:880px;}
-  .hero-eyebrow{
-    font-family:var(--mono); font-size:12px; letter-spacing:3px; color:var(--cyan);
-    text-transform:uppercase; margin-bottom:22px; opacity:0.85;
-  }
-  .hero h1{
-    font-family:var(--mono); font-weight:800; letter-spacing:-1px;
-    font-size:clamp(38px, 7vw, 84px); line-height:0.98;
-    background:linear-gradient(180deg, #f4f1ff 0%, var(--purple) 120%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-    margin-bottom:22px;
-  }
-  .hero p.lede{
-    font-size:clamp(15px,2vw,19px); color:var(--muted); max-width:620px; margin:0 auto 36px;
-    font-weight:400;
-  }
-  .hero p.lede b{color:var(--text); font-weight:600;}
-  .hero-actions{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
-  .btn{
-    font-family:var(--mono); font-size:13px; font-weight:600; padding:13px 26px;
-    border-radius:2px; text-decoration:none; letter-spacing:0.3px; transition:all .2s;
-    display:inline-flex; align-items:center; gap:8px;
-  }
-  .btn-primary{background:var(--purple); color:#0a0a12;}
-  .btn-primary:hover{background:#a78bfa; transform:translateY(-1px);}
-  .btn-ghost{border:1px solid var(--line); color:var(--text);}
-  .btn-ghost:hover{border-color:var(--purple-dim); background:var(--panel);}
-  .scroll-hint{
-    position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
-    font-family:var(--mono); font-size:11px; color:var(--muted-2); letter-spacing:2px; z-index:2;
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--purple-deep); color: #fff; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
 
-  /* ---------- SECTION SHELL ---------- */
-  section{padding:100px 24px; position:relative;}
-  .wrap{max-width:1080px; margin:0 auto;}
-  .prompt-label{
-    font-family:var(--mono); font-size:12px; color:var(--muted-2); margin-bottom:14px;
-    display:flex; align-items:center; gap:8px;
+  /* ── NAV ───────────────────────────────────────────────────── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(6,6,10,0.82);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
   }
-  .prompt-label::before{content:'$'; color:var(--purple);}
-  .section-title{
-    font-family:var(--mono); font-weight:700; font-size:clamp(24px,3.4vw,38px);
-    letter-spacing:-0.5px; margin-bottom:18px; color:var(--text);
+  .nav-brand {
+    font-family: var(--mono); font-weight: 800; font-size: 13px;
+    letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
   }
-  .section-sub{color:var(--muted); max-width:640px; font-size:15.5px; margin-bottom:52px;}
-  .divider{height:1px; background:linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent); margin:0 auto;}
+  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 12px var(--purple); animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+  .nav-links { display: flex; gap: 28px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .nav-links a { transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-right { display: flex; gap: 10px; align-items: center; }
+  .btn-sm {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    padding: 8px 16px; border-radius: 4px; transition: all .2s; white-space: nowrap;
+  }
+  .btn-sm.ghost { border: 1px solid var(--line); color: var(--muted); }
+  .btn-sm.ghost:hover { border-color: var(--purple-dim); color: var(--text); }
+  .btn-sm.solid { background: var(--purple); color: #0a0a12; border: 1px solid var(--purple); }
+  .btn-sm.solid:hover { background: #a78bfa; }
+  @media (max-width: 860px) { .nav-links { display: none; } }
 
-  /* ---------- PHILOSOPHY ---------- */
-  .philosophy-grid{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start;}
-  @media (max-width:760px){.philosophy-grid{grid-template-columns:1fr;}}
-  .philosophy-quote{
-    font-family:var(--mono); font-size:clamp(18px,2.4vw,24px); line-height:1.5; color:var(--text);
-    border-left:2px solid var(--purple); padding-left:24px;
+  /* ── HERO ──────────────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 120px 24px 80px;
+    position: relative; border-bottom: 1px solid var(--line);
+    overflow: hidden;
   }
-  .philosophy-quote span{color:var(--cyan);}
-  .philosophy-body p{color:var(--muted); margin-bottom:16px; font-size:15px;}
+  #flowCanvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.7; pointer-events: none; }
+  .hero-inner { position: relative; z-index: 2; max-width: 860px; }
 
-  /* ---------- PIPELINE ---------- */
-  .pipeline{display:flex; align-items:center; gap:0; overflow-x:auto; padding:8px 0 24px; }
-  .pipe-node{
-    flex:0 0 auto; min-width:150px; background:var(--panel); border:1px solid var(--line);
-    border-radius:4px; padding:18px 16px; text-align:center; position:relative;
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; color: var(--cyan);
+    border: 1px solid rgba(34,211,238,0.25); border-radius: 20px;
+    padding: 6px 14px; margin-bottom: 32px; letter-spacing: 1px;
   }
-  .pipe-node .k{font-family:var(--mono); font-size:10px; color:var(--purple); letter-spacing:1.5px; margin-bottom:8px;}
-  .pipe-node .v{font-family:var(--mono); font-size:13px; font-weight:600;}
-  .pipe-arrow{flex:0 0 auto; width:36px; text-align:center; color:var(--muted-2); font-family:var(--mono);}
-  .phase-strip{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line);
-    border:1px solid var(--line); border-radius:4px; overflow:hidden; margin-top:40px;
-  }
-  @media (max-width:700px){.phase-strip{grid-template-columns:1fr;}}
-  .phase-cell{background:var(--panel); padding:24px 20px;}
-  .phase-cell .tag{font-family:var(--mono); font-size:11px; color:var(--muted-2); letter-spacing:1px; margin-bottom:6px;}
-  .phase-cell .name{font-family:var(--mono); font-weight:700; color:var(--purple); margin-bottom:8px; font-size:15px;}
-  .phase-cell .desc{font-size:13.5px; color:var(--muted);}
+  .hero-badge .led { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: pulse 1.8s ease-in-out infinite; }
 
-  /* ---------- METRICS ---------- */
-  .metrics-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:4px; overflow:hidden;}
-  @media (max-width:800px){.metrics-grid{grid-template-columns:repeat(2,1fr);}}
-  .metric{background:var(--panel); padding:32px 24px; transition:background .2s;}
-  .metric:hover{background:var(--panel-2);}
-  .metric .num{font-family:var(--mono); font-size:clamp(28px,3.6vw,40px); font-weight:800; color:var(--text);}
-  .metric .num.warn{color:var(--amber);}
-  .metric .lbl{font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:1px; margin-top:8px; text-transform:uppercase;}
-  .metric .delta{font-family:var(--mono); font-size:11px; color:var(--cyan); margin-top:4px;}
-
-  .cloud-row{display:flex; gap:14px; margin-top:44px; flex-wrap:wrap;}
-  .cloud-chip{
-    font-family:var(--mono); font-size:12.5px; border:1px solid var(--line); border-radius:20px;
-    padding:8px 16px; display:flex; align-items:center; gap:8px; color:var(--muted);
-  }
-  .cloud-chip .led{width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan);}
-  .cloud-chip b{color:var(--text);}
-
-  /* ---------- PATTERNS TABLE ---------- */
-  .table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:4px;}
-  table{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:13px; min-width:640px;}
-  th{
-    text-align:left; padding:14px 18px; background:var(--panel-2); color:var(--muted);
-    font-weight:500; font-size:11px; letter-spacing:1px; text-transform:uppercase;
-    border-bottom:1px solid var(--line);
-  }
-  td{padding:14px 18px; border-bottom:1px solid var(--line); color:var(--text);}
-  tr:last-child td{border-bottom:none;}
-  tr:hover td{background:rgba(139,92,246,0.04);}
-  .badge{padding:3px 9px; border-radius:3px; font-size:11px; font-weight:700; letter-spacing:0.5px;}
-  .badge-pe{background:rgba(139,92,246,0.15); color:var(--purple);}
-  .badge-lm{background:rgba(34,211,238,0.12); color:var(--cyan);}
-  .badge-ta{background:rgba(245,166,35,0.14); color:var(--amber);}
-  .badge-di{background:rgba(148,163,184,0.14); color:#94a3b8;}
-  .conf-bar{width:80px; height:5px; background:var(--line); border-radius:3px; overflow:hidden; display:inline-block; vertical-align:middle; margin-right:8px;}
-  .conf-fill{height:100%; background:var(--purple);}
-
-  /* ---------- PROPOSALS ---------- */
-  .proposals{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
-  @media (max-width:760px){.proposals{grid-template-columns:1fr;}}
-  .proposal-card{
-    background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:26px;
-    position:relative; overflow:hidden;
-  }
-  .proposal-card::before{
-    content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--amber);
-  }
-  .proposal-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; gap:12px;}
-  .proposal-id{font-family:var(--mono); font-weight:700; font-size:15px;}
-  .status-pill{
-    font-family:var(--mono); font-size:10px; color:var(--amber); border:1px solid rgba(245,166,35,0.4);
-    padding:4px 10px; border-radius:20px; letter-spacing:0.5px; white-space:nowrap;
-  }
-  .proposal-path{
-    font-family:var(--mono); font-size:12.5px; color:var(--cyan); background:var(--void);
-    padding:10px 12px; border-radius:3px; margin-bottom:16px; overflow-x:auto; white-space:nowrap;
-  }
-  .kv-row{display:flex; justify-content:space-between; font-family:var(--mono); font-size:12.5px; padding:6px 0; border-top:1px dashed var(--line);}
-  .kv-row span:first-child{color:var(--muted);}
-
-  /* ---------- GOVERNANCE ---------- */
-  .gov-list{display:grid; grid-template-columns:1fr 1fr; gap:14px 32px;}
-  @media (max-width:700px){.gov-list{grid-template-columns:1fr;}}
-  .gov-item{display:flex; gap:12px; align-items:flex-start; font-size:14.5px; color:var(--text);}
-  .gov-item .check{color:var(--purple); font-family:var(--mono); font-weight:700; flex:0 0 auto;}
-
-  /* ---------- STACK ---------- */
-  .stack-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
-  @media (max-width:760px){.stack-grid{grid-template-columns:1fr 1fr;}}
-  @media (max-width:480px){.stack-grid{grid-template-columns:1fr;}}
-  .stack-item{
-    border:1px solid var(--line); border-radius:4px; padding:18px; background:var(--panel);
-  }
-  .stack-item .name{font-family:var(--mono); font-weight:700; color:var(--purple); font-size:14px; margin-bottom:6px;}
-  .stack-item .role{font-size:12.5px; color:var(--muted);}
-
-  /* ---------- CTA / DOWNLOAD ---------- */
-  .cta-section{
-    background:radial-gradient(ellipse at center, rgba(139,92,246,0.08), transparent 70%);
-    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
-    text-align:center;
-  }
-  .cta-section h2{font-family:var(--mono); font-size:clamp(24px,3.6vw,36px); margin-bottom:16px;}
-  .cta-section p{color:var(--muted); max-width:520px; margin:0 auto 32px;}
-  .code-line{
-    font-family:var(--mono); font-size:13px; background:var(--panel); border:1px solid var(--line);
-    border-radius:4px; padding:14px 20px; display:inline-block; color:var(--cyan); margin-bottom:28px;
+  .hero h1 {
+    font-family: var(--mono); font-weight: 800;
+    font-size: clamp(48px, 9vw, 100px); line-height: 0.92;
+    letter-spacing: -2px;
+    background: linear-gradient(160deg, #f0eeff 0%, #c4b5fd 40%, var(--purple) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 28px;
   }
 
-  /* ---------- FOOTER ---------- */
-  footer{padding:48px 24px 32px; border-top:1px solid var(--line);}
-  .footer-grid{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; max-width:1080px; margin:0 auto;}
-  .footer-brand{font-family:var(--mono); font-size:13px; color:var(--muted);}
-  .footer-links{display:flex; gap:24px; font-family:var(--mono); font-size:12px; color:var(--muted-2);}
-  .footer-links a{text-decoration:none; transition:color .2s;}
-  .footer-links a:hover{color:var(--purple);}
+  .hero-sub {
+    font-size: clamp(16px, 2.2vw, 20px); color: var(--muted);
+    max-width: 580px; margin: 0 auto 44px; font-weight: 400; line-height: 1.65;
+  }
+  .hero-sub strong { color: var(--text); font-weight: 600; }
+
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-hero {
+    font-family: var(--mono); font-size: 13px; font-weight: 700;
+    padding: 14px 28px; border-radius: 5px; transition: all .22s;
+    display: inline-flex; align-items: center; gap: 9px; letter-spacing: 0.2px;
+  }
+  .btn-hero.primary { background: var(--purple); color: #0a0a12; }
+  .btn-hero.primary:hover { background: #a78bfa; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(139,92,246,0.35); }
+  .btn-hero.secondary { border: 1px solid var(--line); color: var(--text); background: transparent; }
+  .btn-hero.secondary:hover { border-color: var(--purple-dim); background: rgba(139,92,246,0.06); }
+
+  .hero-meta {
+    margin-top: 52px; display: flex; gap: 32px; justify-content: center;
+    flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--muted-2);
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .dot-g { background: var(--green); }
+  .dot-p { background: var(--purple); }
+  .dot-c { background: var(--cyan); }
+
+  .scroll-down {
+    position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--muted-2);
+    z-index: 2; animation: bounce 2s ease-in-out infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+  /* ── WRAP UTILITY ─────────────────────────────────────────── */
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  section { padding: 96px 24px; }
+  .label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 2.5px;
+    color: var(--purple); text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-h {
+    font-family: var(--mono); font-weight: 700; font-size: clamp(26px, 3.5vw, 40px);
+    letter-spacing: -0.5px; margin-bottom: 16px; color: var(--text);
+  }
+  .section-p { color: var(--muted); font-size: 16px; max-width: 560px; margin-bottom: 56px; line-height: 1.7; }
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent); }
+
+  /* ── INSTALL BLOCK ────────────────────────────────────────── */
+  .install-block {
+    display: flex; align-items: center; gap: 0;
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; max-width: 540px; margin: 0 auto 48px;
+  }
+  .install-block .prefix {
+    padding: 14px 16px; font-family: var(--mono); font-size: 13px;
+    color: var(--purple); border-right: 1px solid var(--line); background: var(--panel-2);
+    white-space: nowrap;
+  }
+  .install-block .cmd {
+    flex: 1; padding: 14px 16px; font-family: var(--mono); font-size: 13px;
+    color: var(--cyan); white-space: nowrap; overflow-x: auto;
+  }
+  .install-block .copy-btn {
+    padding: 14px 16px; border-left: 1px solid var(--line); cursor: pointer;
+    font-family: var(--mono); font-size: 11px; color: var(--muted); background: none;
+    border-top: none; border-right: none; border-bottom: none;
+    transition: color .2s; white-space: nowrap;
+  }
+  .install-block .copy-btn:hover { color: var(--text); }
+
+  /* ── FEATURES ────────────────────────────────────────────── */
+  .features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  @media (max-width: 860px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .features-grid { grid-template-columns: 1fr; } }
+
+  .feat-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 26px 22px; transition: border-color .25s, transform .2s;
+    position: relative; overflow: hidden;
+  }
+  .feat-card:hover { border-color: var(--purple-dim); transform: translateY(-2px); }
+  .feat-card .fc-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .fc-purple { background: rgba(139,92,246,0.12); }
+  .fc-cyan   { background: rgba(34,211,238,0.10); }
+  .fc-amber  { background: rgba(245,166,35,0.10); }
+  .fc-green  { background: rgba(34,197,94,0.10); }
+  .feat-card .fc-name {
+    font-family: var(--mono); font-weight: 700; font-size: 14px;
+    color: var(--text); margin-bottom: 8px;
+  }
+  .feat-card .fc-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+
+  /* ── HOW IT WORKS ────────────────────────────────────────── */
+  .pipeline {
+    display: flex; align-items: center; gap: 0; overflow-x: auto;
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 0; margin-bottom: 40px;
+  }
+  .pipe-step {
+    flex: 0 0 auto; padding: 24px 22px; text-align: center;
+    border-right: 1px solid var(--line); min-width: 120px;
+    transition: background .2s;
+  }
+  .pipe-step:last-child { border-right: none; }
+  .pipe-step:hover { background: var(--panel-2); }
+  .pipe-step .ps-num { font-family: var(--mono); font-size: 10px; color: var(--purple); letter-spacing: 1.5px; margin-bottom: 8px; }
+  .pipe-step .ps-name { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); }
+  .pipe-step .ps-tag { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  /* ── STATS BAR ───────────────────────────────────────────── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  }
+  @media (max-width: 700px) { .stats-bar { grid-template-columns: repeat(2,1fr); } }
+  .stat-cell { background: var(--panel); padding: 32px 24px; text-align: center; }
+  .stat-cell .sv { font-family: var(--mono); font-size: clamp(28px,3.5vw,40px); font-weight: 800; color: var(--text); }
+  .stat-cell .sl { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 1px; margin-top: 6px; text-transform: uppercase; }
+
+  /* ── OPEN SOURCE CTA ─────────────────────────────────────── */
+  .oss-section {
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    background: radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.1) 0%, transparent 65%);
+    text-align: center; padding: 96px 24px;
+  }
+  .oss-section h2 { font-family: var(--mono); font-size: clamp(28px,4vw,44px); font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+  .oss-section p { color: var(--muted); font-size: 16px; max-width: 480px; margin: 0 auto 40px; line-height: 1.7; }
+  .oss-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-lg {
+    font-family: var(--mono); font-size: 14px; font-weight: 700;
+    padding: 16px 32px; border-radius: 5px; transition: all .22s;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .btn-lg.primary { background: var(--purple); color: #0a0a12; }
+  .btn-lg.primary:hover { background: #a78bfa; transform: translateY(-1px); box-shadow: 0 10px 36px rgba(139,92,246,0.35); }
+  .btn-lg.ghost { border: 1px solid var(--line); color: var(--text); }
+  .btn-lg.ghost:hover { border-color: var(--purple-dim); background: rgba(139,92,246,0.05); }
+
+  /* ── STACK ROW ───────────────────────────────────────────── */
+  .stack-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 0; }
+  .stack-chip {
+    font-family: var(--mono); font-size: 12px; border: 1px solid var(--line);
+    border-radius: 4px; padding: 8px 14px; color: var(--muted); background: var(--panel);
+    transition: border-color .2s, color .2s;
+  }
+  .stack-chip:hover { border-color: var(--purple-dim); color: var(--text); }
+
+  /* ── FOOTER ──────────────────────────────────────────────── */
+  footer { padding: 44px 24px 32px; border-top: 1px solid var(--line); }
+  .footer-inner {
+    max-width: 1080px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 20px;
+  }
+  .footer-brand { font-family: var(--mono); font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+  .footer-links { display: flex; gap: 24px; font-family: var(--mono); font-size: 12px; color: var(--muted-2); }
+  .footer-links a { transition: color .2s; }
+  .footer-links a:hover { color: var(--purple); }
 </style>
 </head>
 <body>
 
+<!-- ═══════════════════════ NAV ═══════════════════════ -->
 <nav class="nav">
-  <div class="nav-brand"><span class="dot"></span>HOLLOW_PURPLE</div>
+  <div class="nav-brand"><span class="pulse"></span>HOLLOW_PURPLE</div>
   <div class="nav-links">
-    <a href="#architecture">architecture</a>
-    <a href="#metrics">metrics</a>
-    <a href="#patterns">patterns</a>
-    <a href="#mahoragha">mahoragha</a>
-    <a href="#governance">governance</a>
+    <a href="#features">features</a>
+    <a href="#how-it-works">how it works</a>
+    <a href="#stack">stack</a>
+    <a href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">github</a>
   </div>
-  <a class="nav-cta" href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">View source →</a>
+  <div class="nav-right">
+    <a class="btn-sm ghost" href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">Star on GitHub ★</a>
+    <a class="btn-sm solid" href="https://github.com/Tejaswanth2406/hollow-purple/archive/refs/heads/main.zip">Download ZIP</a>
+  </div>
 </nav>
 
+<!-- ═══════════════════════ HERO ══════════════════════ -->
 <section class="hero">
   <canvas id="flowCanvas"></canvas>
-  <div class="hero-content">
-    <div class="hero-eyebrow">Adaptive Cloud Identity Architecture</div>
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="led"></span>Open Source · MIT License · v1.0.0</div>
+
     <h1>HOLLOW<br>PURPLE</h1>
-    <p class="lede">Attackers explore a maze. Hollow Purple watches the movement.<br><b>MAHORAGHA moves the walls.</b></p>
+
+    <p class="hero-sub">
+      An autonomous cloud identity defense platform that <strong>watches attackers move through a maze</strong> — then moves the walls. Built with AI, deception engines, and graph intelligence.
+    </p>
+
     <div class="hero-actions">
-      <a class="btn btn-primary" href="https://github.com/Tejaswanth2406/hollow-purple/archive/refs/heads/main.zip">Download index.html</a>
-      <a class="btn btn-ghost" href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">github.com/Tejaswanth2406/hollow-purple</a>
+      <a class="btn-hero primary" href="https://github.com/Tejaswanth2406/hollow-purple/archive/refs/heads/main.zip">
+        ↓ Download ZIP
+      </a>
+      <a class="btn-hero secondary" href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">
+        View on GitHub →
+      </a>
+    </div>
+
+    <div class="hero-meta">
+      <span><span class="dot dot-g"></span>MIT License</span>
+      <span><span class="dot dot-p"></span>Python 3.11+</span>
+      <span><span class="dot dot-c"></span>FastAPI · PyTorch · Neo4j</span>
+      <span><span class="dot dot-g"></span>AWS · GCP · Azure</span>
     </div>
   </div>
-  <div class="scroll-hint">SCROLL ↓</div>
+  <div class="scroll-down">SCROLL ↓</div>
 </section>
 
-<section id="whoami">
+<!-- ═══════════════════════ INSTALL ════════════════════ -->
+<section style="padding: 64px 24px 0; text-align: center;">
   <div class="wrap">
-    <div class="prompt-label">cat /proc/architecture</div>
-    <div class="philosophy-grid">
-      <div class="philosophy-quote">It doesn't fire alerts — it <span>understands behavior</span>. It doesn't chase intruders — it moves the <span>walls</span>.</div>
-      <div class="philosophy-body">
-        <p>Traditional SIEM tools search logs after the fact. Hollow Purple maintains a live, temporal graph of every identity, role, and privilege edge across AWS, GCP, and Azure — then watches how that graph moves.</p>
-        <p>When a behavior repeats with structural consistency, the Copy Layer remembers it as a pattern. When a pattern crosses a confidence threshold, MAHORAGHA proposes a mutation — never applies one — and waits for a human to pull the lever.</p>
+    <div class="label" style="text-align:center; margin-bottom: 20px;">get started in 30 seconds</div>
+    <div class="install-block">
+      <span class="prefix">$</span>
+      <span class="cmd" id="cloneCmd">git clone https://github.com/Tejaswanth2406/hollow-purple.git</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyCmd()">copy</button>
+    </div>
+    <p style="font-family: var(--mono); font-size: 12px; color: var(--muted-2); margin-top: 14px;">
+      or <a href="https://github.com/Tejaswanth2406/hollow-purple/archive/refs/heads/main.zip" style="color: var(--purple);">download the ZIP</a> · no account required
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════ STATS ══════════════════════ -->
+<section style="padding: 64px 24px 96px;">
+  <div class="wrap">
+    <div class="stats-bar">
+      <div class="stat-cell"><div class="sv">3</div><div class="sl">AI Layers</div></div>
+      <div class="stat-cell"><div class="sv">47s</div><div class="sl">Avg. Time to Neutralize</div></div>
+      <div class="stat-cell"><div class="sv">0</div><div class="sl">Real Records Exfiltrated (in tests)</div></div>
+      <div class="stat-cell"><div class="sv">MIT</div><div class="sl">License — Free Forever</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════ FEATURES ════════════════════ -->
+<section id="features">
+  <div class="wrap">
+    <div class="label">what it does</div>
+    <h2 class="section-h">Defense that thinks before it acts</h2>
+    <p class="section-p">Hollow Purple doesn't just alert. It observes, decides, deceives, and neutralises — without touching production systems until it's sure.</p>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="fc-icon fc-purple">🕸</div>
+        <div class="fc-name">Identity Graph Engine</div>
+        <div class="fc-desc">Maintains a live temporal graph of every identity, role, and privilege edge across AWS, GCP, and Azure. Watches how the graph moves in real time.</div>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon fc-cyan">🧠</div>
+        <div class="fc-name">AI Threat Detection</div>
+        <div class="fc-desc">A Graph Neural Network (GNN) trained on attack topologies spots lateral movement patterns before a human analyst would see the shape.</div>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon fc-amber">🎭</div>
+        <div class="fc-name">Deception Engine</div>
+        <div class="fc-desc">When risk crosses 0.7, attackers are silently redirected to a convincing fake environment. They think they won. Every move is recorded.</div>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon fc-green">⚖️</div>
+        <div class="fc-name">MAHORAGHA Governance</div>
+        <div class="fc-desc">Zero auto-apply to production. Every mutation is proposed, explainability-scored, and gated behind a human decision. Always advisory.</div>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon fc-purple">🔗</div>
+        <div class="fc-name">Merkle Audit Log</div>
+        <div class="fc-desc">Every event, every decision, every session is hash-chained into a tamper-evident Merkle log. Replay any point in time to the millisecond.</div>
+      </div>
+      <div class="feat-card">
+        <div class="fc-icon fc-cyan">🤖</div>
+        <div class="fc-name">RL Defense Agent</div>
+        <div class="fc-desc">A PPO-trained reinforcement learning agent continuously improves its response strategy — picking the lowest-blast-radius action every time.</div>
       </div>
     </div>
   </div>
 </section>
 
-<section id="architecture">
+<div class="divider"></div>
+
+<!-- ═══════════════════════ HOW IT WORKS ════════════════ -->
+<section id="how-it-works">
   <div class="wrap">
-    <div class="prompt-label">ls -la /modules</div>
-    <h2 class="section-title">Three phases, one nervous system</h2>
-    <p class="section-sub">Cloud events flow through an append-only ledger into a temporal graph, get compared against behavioral baselines, and — only after persistence and isomorphism checks — reach the adaptive defense engine.</p>
+    <div class="label">the pipeline</div>
+    <h2 class="section-h">From raw event to neutralised threat</h2>
+    <p class="section-p">Eight stages. One continuous loop. Attacker never reaches real data.</p>
 
     <div class="pipeline">
-      <div class="pipe-node"><div class="k">SOURCE</div><div class="v">Cloud Events</div></div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node"><div class="k">STORE</div><div class="v">Event Ledger</div></div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node"><div class="k">MODEL</div><div class="v">Graph Engine</div></div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node"><div class="k">COMPARE</div><div class="v">Baseline + Anomaly</div></div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node"><div class="k">REMEMBER</div><div class="v">Copy Layer</div></div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node"><div class="k">PROPOSE</div><div class="v">MAHORAGHA ADE</div></div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-node"><div class="k">DECIDE</div><div class="v">Architect Gate</div></div>
+      <div class="pipe-step"><div class="ps-num">01</div><div class="ps-name">Cloud Event</div><div class="ps-tag">AWS · GCP · Azure</div></div>
+      <div class="pipe-step"><div class="ps-num">02</div><div class="ps-name">Ingestion</div><div class="ps-tag">Normalise · Validate</div></div>
+      <div class="pipe-step"><div class="ps-num">03</div><div class="ps-name">Graph Update</div><div class="ps-tag">Identity · Roles · Edges</div></div>
+      <div class="pipe-step"><div class="ps-num">04</div><div class="ps-name">GNN Scores</div><div class="ps-tag">Pattern recognition</div></div>
+      <div class="pipe-step"><div class="ps-num">05</div><div class="ps-name">Bayesian Risk</div><div class="ps-tag">Propagate · Quantify</div></div>
+      <div class="pipe-step"><div class="ps-num">06</div><div class="ps-name">RL Agent Acts</div><div class="ps-tag">Lowest blast radius</div></div>
+      <div class="pipe-step"><div class="ps-num">07</div><div class="ps-name">Deception / Isolate</div><div class="ps-tag">Cage or cut</div></div>
+      <div class="pipe-step"><div class="ps-num">08</div><div class="ps-name">Merkle Sealed</div><div class="ps-tag">Tamper-proof log</div></div>
     </div>
 
-    <div class="phase-strip">
-      <div class="phase-cell">
-        <div class="tag">PHASE 1</div>
-        <div class="name">Hollow Purple</div>
-        <div class="desc">Behavioral intelligence layer. Builds the live IAM graph and scores privilege drift across every cloud identity.</div>
-      </div>
-      <div class="phase-cell">
-        <div class="tag">BRIDGE</div>
-        <div class="name">Copy Layer</div>
-        <div class="desc">Evolutionary memory. Requires structural isomorphism, a privilege gradient, ≥3 observations, and context independence before a pattern is stored.</div>
-      </div>
-      <div class="phase-cell">
-        <div class="tag">PHASE 2</div>
-        <div class="name">MAHORAGHA</div>
-        <div class="desc">Adaptive defense engine. Turns stored patterns into advisory mutation proposals — always gated behind human approval.</div>
-      </div>
-    </div>
+    <p style="font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: center;">
+      Full walkthrough in the <a href="https://github.com/Tejaswanth2406/hollow-purple/blob/main/README.md" target="_blank" rel="noopener" style="color: var(--purple);">README</a> · Average latency from event to action: <span style="color: var(--cyan);">~47ms</span>
+    </p>
   </div>
 </section>
 
-<section id="metrics">
-  <div class="wrap">
-    <div class="prompt-label">netstat -an | grep ACTIVE</div>
-    <h2 class="section-title">What's being watched, right now</h2>
-    <p class="section-sub">A live snapshot of identity coverage and privilege concentration across every connected provider.</p>
+<div class="divider"></div>
 
-    <div class="metrics-grid">
-      <div class="metric"><div class="num">2,847</div><div class="lbl">Identities Tracked</div></div>
-      <div class="metric"><div class="num">143</div><div class="lbl">High-Priv Paths</div><div class="delta">↑ 12 this cycle</div></div>
-      <div class="metric"><div class="num">61</div><div class="lbl">Patterns Stored</div><div class="delta">+7 this cycle</div></div>
-      <div class="metric"><div class="num warn">0.74</div><div class="lbl">Gini Coefficient</div><div class="delta" style="color:var(--amber);">⚠ high risk</div></div>
-    </div>
-
-    <div class="cloud-row">
-      <div class="cloud-chip"><span class="led"></span>AWS <b>1,204</b> identities</div>
-      <div class="cloud-chip"><span class="led"></span>GCP <b>987</b> identities</div>
-      <div class="cloud-chip"><span class="led"></span>Azure <b>656</b> identities</div>
-    </div>
-  </div>
-</section>
-
-<section id="patterns">
-  <div class="wrap">
-    <div class="prompt-label">cat /proc/copy_layer</div>
-    <h2 class="section-title">Patterns held in memory</h2>
-    <p class="section-sub">Nothing is forwarded on a single sighting. Every row here cleared four gates: structural isomorphism, directional privilege gradient, ≥3 temporal observations, and context independence.</p>
-
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>ID</th><th>Type</th><th>Name</th><th>Cloud</th><th>Obs</th><th>Confidence</th></tr></thead>
-        <tbody>
-          <tr><td>001</td><td><span class="badge badge-pe">PE</span></td><td>H2S_privilege_bridge_v2</td><td>GCP</td><td>7</td><td><span class="conf-bar"><span class="conf-fill" style="width:84%"></span></span>0.84</td></tr>
-          <tr><td>002</td><td><span class="badge badge-lm">LM</span></td><td>cross_project_role_hop_v1</td><td>AWS</td><td>4</td><td><span class="conf-bar"><span class="conf-fill" style="width:71%"></span></span>0.71</td></tr>
-          <tr><td>003</td><td><span class="badge badge-ta">TA</span></td><td>sts_credential_chain_v3</td><td>AWS</td><td>9</td><td><span class="conf-bar"><span class="conf-fill" style="width:91%"></span></span>0.91</td></tr>
-          <tr><td>004</td><td><span class="badge badge-di">DI</span></td><td>dormant_reactivation_v1</td><td>Azure</td><td>3</td><td><span class="conf-bar"><span class="conf-fill" style="width:58%"></span></span>0.58</td></tr>
-          <tr><td>005</td><td><span class="badge badge-pe">PE</span></td><td>viewer_to_owner_drift_v1</td><td>GCP</td><td>5</td><td><span class="conf-bar"><span class="conf-fill" style="width:76%"></span></span>0.76</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<section id="mahoragha">
-  <div class="wrap">
-    <div class="prompt-label">cat /proc/mahoragha/proposals</div>
-    <h2 class="section-title">Proposed mutations, awaiting a human</h2>
-    <p class="section-sub">MAHORAGHA never writes to production. Every proposal ships with the exact reachability delta it would cause, for an architect to approve or reject.</p>
-
-    <div class="proposals">
-      <div class="proposal-card">
-        <div class="proposal-head"><div class="proposal-id">MAH-003 · GCP IAM Mutation</div><div class="status-pill">PENDING</div></div>
-        <div class="proposal-path">workload-identity → roles/editor → iam.admin</div>
-        <div class="kv-row"><span>Pattern</span><span>H2S_privilege_bridge_v2</span></div>
-        <div class="kv-row"><span>Action</span><span>Insert intermediate binding + securityAdmin</span></div>
-        <div class="kv-row"><span>Reachability Δ</span><span style="color:var(--cyan)">−18 paths</span></div>
-        <div class="kv-row"><span>Escalation hops Δ</span><span style="color:var(--cyan)">+2 hops</span></div>
-        <div class="kv-row"><span>Confidence</span><span>0.84</span></div>
-      </div>
-      <div class="proposal-card">
-        <div class="proposal-head"><div class="proposal-id">MAH-004 · AWS IAM Mutation</div><div class="status-pill">PENDING</div></div>
-        <div class="proposal-path">ci-runner → sts:AssumeRole → AdministratorAccess</div>
-        <div class="kv-row"><span>Pattern</span><span>sts_credential_chain_v3</span></div>
-        <div class="kv-row"><span>Action</span><span>Scope trust policy to tagged environments</span></div>
-        <div class="kv-row"><span>Reachability Δ</span><span style="color:var(--cyan)">−9 paths</span></div>
-        <div class="kv-row"><span>Escalation hops Δ</span><span style="color:var(--cyan)">+1 hop</span></div>
-        <div class="kv-row"><span>Confidence</span><span>0.91</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="governance">
-  <div class="wrap">
-    <div class="prompt-label">cat /proc/safety</div>
-    <h2 class="section-title">Hard constraints, not settings</h2>
-    <p class="section-sub">These aren't configurable. They're the reason an autonomous defense engine is safe to run against production identity infrastructure.</p>
-
-    <div class="gov-list">
-      <div class="gov-item"><span class="check">✔</span>Read-only observation only</div>
-      <div class="gov-item"><span class="check">✔</span>Advisory output — zero auto-apply</div>
-      <div class="gov-item"><span class="check">✔</span>N ≥ 3 observations before a pattern is stored</div>
-      <div class="gov-item"><span class="check">✔</span>Full auditability at every step</div>
-      <div class="gov-item"><span class="check">✔</span>Explicit human authority gate on all mutations</div>
-      <div class="gov-item"><span class="check">✔</span>Zero production mutation risk</div>
-      <div class="gov-item"><span class="check">✔</span>Merkle-chained tamper evidence on every event</div>
-    </div>
-  </div>
-</section>
-
+<!-- ═══════════════════════ STACK ════════════════════════ -->
 <section id="stack">
   <div class="wrap">
-    <div class="prompt-label">cat /proc/db_stack</div>
-    <h2 class="section-title">Under the hood</h2>
-    <div class="stack-grid">
-      <div class="stack-item"><div class="name">PostgreSQL</div><div class="role">Event ledger · JSONB patterns · immutable writes</div></div>
-      <div class="stack-item"><div class="name">Redis</div><div class="role">Caching · streaming queues · backpressure</div></div>
-      <div class="stack-item"><div class="name">Neo4j</div><div class="role">Attack path graph · k-hop extraction</div></div>
-      <div class="stack-item"><div class="name">DuckDB</div><div class="role">OLAP analytics on graph snapshots</div></div>
-      <div class="stack-item"><div class="name">InfluxDB</div><div class="role">Time-series baseline drift history</div></div>
-      <div class="stack-item"><div class="name">Prometheus</div><div class="role">RR · PM · MES · Gini telemetry</div></div>
+    <div class="label">built with</div>
+    <h2 class="section-h">Production-grade open-source stack</h2>
+    <p class="section-p" style="margin-bottom: 32px;">No proprietary dependencies. Swap out any layer with your own tooling.</p>
+    <div class="stack-row">
+      <span class="stack-chip">Python 3.11+</span>
+      <span class="stack-chip">FastAPI</span>
+      <span class="stack-chip">PyTorch</span>
+      <span class="stack-chip">PyTorch Geometric</span>
+      <span class="stack-chip">Stable-Baselines3</span>
+      <span class="stack-chip">NetworkX</span>
+      <span class="stack-chip">PostgreSQL</span>
+      <span class="stack-chip">Redis</span>
+      <span class="stack-chip">Neo4j</span>
+      <span class="stack-chip">DuckDB</span>
+      <span class="stack-chip">InfluxDB</span>
+      <span class="stack-chip">Prometheus</span>
+      <span class="stack-chip">AWS CloudTrail</span>
+      <span class="stack-chip">GCP Audit Logs</span>
+      <span class="stack-chip">Azure Monitor</span>
     </div>
   </div>
 </section>
 
-<section class="cta-section">
+<div class="divider"></div>
+
+<!-- ═══════════════════════ OSS CTA ══════════════════════ -->
+<section class="oss-section">
   <div class="wrap">
-    <h2>Move the walls yourself</h2>
-    <p>Clone the repo, drop this file in as your project's landing page, and wire it to your own ingestion pipeline.</p>
-    <div class="code-line">git clone https://github.com/Tejaswanth2406/hollow-purple.git</div>
-    <div class="hero-actions">
-      <a class="btn btn-primary" href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">Open on GitHub</a>
+    <div class="label" style="text-align:center;">open source · free forever</div>
+    <h2>Download it.<br>Wire it up.<br>Move the walls.</h2>
+    <p>Hollow Purple is MIT-licensed and built to be self-hosted. No SaaS, no subscription, no vendor lock-in. Clone it, configure your cloud credentials, and run it.</p>
+
+    <div class="oss-actions">
+      <a class="btn-lg primary" href="https://github.com/Tejaswanth2406/hollow-purple/archive/refs/heads/main.zip">
+        ↓ Download ZIP
+      </a>
+      <a class="btn-lg ghost" href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">
+        ☆ Star on GitHub
+      </a>
+      <a class="btn-lg ghost" href="https://github.com/Tejaswanth2406/hollow-purple/blob/main/README.md" target="_blank" rel="noopener">
+        Read the Docs
+      </a>
     </div>
+
+    <p style="margin-top: 36px; font-family: var(--mono); font-size: 12px; color: var(--muted-2);">
+      MIT License · No telemetry · No phone-home · Self-hosted
+    </p>
   </div>
 </section>
 
+<!-- ═══════════════════════ FOOTER ════════════════════════ -->
 <footer>
-  <div class="footer-grid">
-    <div class="footer-brand">HOLLOW_PURPLE · MIT License · © 2026</div>
+  <div class="footer-inner">
+    <div class="footer-brand"><span class="pulse"></span>HOLLOW_PURPLE · MIT License · © 2026</div>
     <div class="footer-links">
-      <a href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">Repository</a>
+      <a href="https://github.com/Tejaswanth2406/hollow-purple" target="_blank" rel="noopener">GitHub</a>
       <a href="https://github.com/Tejaswanth2406/hollow-purple/blob/main/README.md" target="_blank" rel="noopener">README</a>
       <a href="https://github.com/Tejaswanth2406/hollow-purple/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+      <a href="https://github.com/Tejaswanth2406/hollow-purple/archive/refs/heads/main.zip">Download</a>
     </div>
   </div>
 </footer>
 
 <script>
-// Ambient graph-convergence visualization: many threads (cloud events) flow in from the
-// left, pass through a gate (the Copy Layer's 4-criteria check), and emerge as far fewer,
-// mutated paths on the right — a direct visual of MAHORAGHA's reachability reduction.
+// ── Copy button ─────────────────────────────────────────
+function copyCmd() {
+  const text = document.getElementById('cloneCmd').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'copy'; btn.style.color = ''; }, 2000);
+  });
+}
+
+// ── Ambient flow canvas ─────────────────────────────────
 (function(){
   const canvas = document.getElementById('flowCanvas');
   const ctx = canvas.getContext('2d');
   let W, H, DPR;
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function resize(){
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -475,74 +507,67 @@
   window.addEventListener('resize', resize);
   resize();
 
-  const N_IN = 46;   // incoming threads (cloud events, many)
-  const N_OUT = 7;   // outgoing threads (surviving patterns, few)
+  const N_IN = 52, N_OUT = 8;
   const gateX = () => W * 0.52;
-  const outX = () => W * 0.92;
-
-  const colors = ['#8b5cf6', '#22d3ee', '#a78bfa', '#5eead4'];
+  const outX  = () => W * 0.96;
+  const colors = ['#8b5cf6','#22d3ee','#a78bfa','#5eead4','#c4b5fd'];
 
   function makeThread(i){
-    const yStart = (H * 0.08) + (i / N_IN) * (H * 0.84) + (Math.random()-0.5)*10;
+    const yStart = (H * 0.06) + (i / N_IN) * (H * 0.88) + (Math.random()-0.5)*8;
     const outIdx = i % N_OUT;
-    const yEnd = (H * 0.18) + (outIdx / (N_OUT-1)) * (H * 0.64);
+    const yEnd   = (H * 0.16) + (outIdx / (N_OUT-1)) * (H * 0.68);
     return {
       yStart, yEnd,
-      gateY: (H*0.5) + (outIdx - N_OUT/2) * (H*0.9/N_OUT) * 0.6,
+      gateY: (H*0.5) + (outIdx - N_OUT/2) * (H*0.85/N_OUT) * 0.55,
       phase: Math.random() * Math.PI * 2,
-      speed: 0.0016 + Math.random()*0.0016,
+      speed: 0.0014 + Math.random()*0.0014,
       color: colors[i % colors.length],
-      width: 0.5 + Math.random()*0.7,
-      alpha: 0.10 + Math.random()*0.22
+      width: 0.4 + Math.random()*0.65,
+      alpha: 0.08 + Math.random()*0.18,
     };
   }
-  let threads = Array.from({length:N_IN}, (_,i)=>makeThread(i));
-
-  function bezierY(t, y0, y1, y2, y3){
-    const mt = 1-t;
-    return mt*mt*mt*y0 + 3*mt*mt*t*y1 + 3*mt*t*t*y2 + t*t*t*y3;
-  }
+  const threads = Array.from({length: N_IN}, (_, i) => makeThread(i));
 
   let t0 = performance.now();
   function draw(now){
     const dt = now - t0; t0 = now;
-    ctx.clearRect(0,0,W,H);
+    ctx.clearRect(0, 0, W, H);
 
     for(const th of threads){
       th.phase += th.speed * dt;
-      const wob = Math.sin(th.phase) * 6;
+      const wob = Math.sin(th.phase) * 5;
 
+      // inbound curve
       ctx.beginPath();
       ctx.moveTo(0, th.yStart);
-      // curve into the gate
-      ctx.bezierCurveTo(W*0.22, th.yStart, W*0.34, th.gateY+wob, gateX(), th.gateY+wob*0.4);
+      ctx.bezierCurveTo(W*0.22, th.yStart, W*0.36, th.gateY+wob, gateX(), th.gateY+wob*0.4);
       ctx.strokeStyle = th.color;
       ctx.globalAlpha = th.alpha;
       ctx.lineWidth = th.width;
       ctx.stroke();
 
+      // outbound curve
       ctx.beginPath();
       ctx.moveTo(gateX(), th.gateY+wob*0.4);
-      ctx.bezierCurveTo(W*0.68, th.gateY, W*0.8, th.yEnd, outX(), th.yEnd);
-      ctx.globalAlpha = th.alpha * 1.4;
+      ctx.bezierCurveTo(W*0.66, th.gateY, W*0.82, th.yEnd, outX(), th.yEnd);
+      ctx.globalAlpha = th.alpha * 1.5;
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
 
-    // the gate marker
-    ctx.strokeStyle = 'rgba(139,92,246,0.35)';
+    // gate line
+    ctx.strokeStyle = 'rgba(139,92,246,0.28)';
     ctx.lineWidth = 1;
-    ctx.setLineDash([2,6]);
+    ctx.setLineDash([3, 7]);
     ctx.beginPath();
-    ctx.moveTo(gateX(), H*0.05); ctx.lineTo(gateX(), H*0.95);
+    ctx.moveTo(gateX(), H*0.04); ctx.lineTo(gateX(), H*0.96);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    if(!reduceMotion) requestAnimationFrame(draw);
+    if(!noMotion) requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
 })();
 </script>
-
 </body>
 </html>

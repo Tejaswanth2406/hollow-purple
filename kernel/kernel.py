@@ -12,11 +12,11 @@ from typing import Callable, Awaitable, Dict, List
 from configs.config_loader import ConfigLoader
 
 from api.server import start_api_server
-from ingestion.orchestrator import start_ingestion_pipeline
+from ingestion.startup import start_ingestion_pipeline
 from graph.builder import GraphBuilder
 from engine.orchestrator import EngineOrchestrator
 from api.workers.scheduler import WorkerScheduler
-from MAHORAGHA.health import start_health_monitor
+from MAHORAGHA.startup import start_health_monitor
 
 
 logger = logging.getLogger("hp.kernel")

@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hollow-purple-api
+  namespace: hollow-purple
+  labels:
+    app: hollow-purple-api
+    component: control-plane
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hollow-purple-api
+  template:
+    metadata:
+      labels:
+        app: hollow-purple-api
+        component: control-plane
+    spec:
+      serviceAccountName: hollow-purple-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      containers:
+      - name: api-gateway
+        image: hollow-purple:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        - containerPort: 8443
+          name: https
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: hollow-purple-secrets
+              key: redis-url
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: hollow-purple-secrets
+              key: postgres-url
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-service:9092"
+        - name: NEO4J_URI
+          valueFrom:
+            secretKeyRef:
+              name: hollow-purple-secrets
+              key: neo4j-uri
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: hollow-purple-secrets
+              key: openai-api-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: cache-volume
+          mountPath: /app/cache
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
+      - name: cache-volume
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - hollow-purple-api
+              topologyKey: kubernetes.io/hostname
+      tolerations:
+      - key: "node-type"
+        operator: "Equal"
+        value: "compute-optimized"
+        effect: "NoSchedule"

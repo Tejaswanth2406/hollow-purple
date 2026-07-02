@@ -1,0 +1,200 @@
+groups:
+  - name: hollow_purple_alerts
+    rules:
+      # API Gateway Alerts
+      - alert: HollowPurpleAPIDown
+        expr: up{job="hollow-purple-api"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: api-gateway
+        annotations:
+          summary: "Hollow Purple API Gateway is down"
+          description: "Hollow Purple API Gateway has been down for more than 5 minutes."
+
+      - alert: HollowPurpleAPIHighErrorRate
+        expr: rate(http_requests_total{job="hollow-purple-api", status=~"5.."}[5m]) / rate(http_requests_total{job="hollow-purple-api"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "High error rate on Hollow Purple API"
+          description: "Error rate is {{ $value | printf "%.2f" }}% over the last 5 minutes."
+
+      - alert: HollowPurpleAPIHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="hollow-purple-api"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "High latency on Hollow Purple API"
+          description: "95th percentile latency is {{ $value | printf "%.2f" }}s over the last 5 minutes."
+
+      # Control Plane Alerts
+      - alert: ControlPlaneComponentDown
+        expr: up{job="hollow-purple-control-plane"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: control-plane
+        annotations:
+          summary: "Control Plane component is down"
+          description: "{{ $labels.kubernetes_pod_name }} in {{ $labels.kubernetes_namespace }} has been down for more than 5 minutes."
+
+      - alert: AIReasoningServiceOverload
+        expr: rate(ai_reasoning_requests_total[5m]) > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: ai-reasoning
+        annotations:
+          summary: "AI Reasoning service overloaded"
+          description: "AI Reasoning service is processing more than 100 requests per minute."
+
+      # Data Plane Alerts
+      - alert: DataPlaneComponentDown
+        expr: up{job="hollow-purple-data-plane"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: data-plane
+        annotations:
+          summary: "Data Plane component is down"
+          description: "{{ $labels.kubernetes_pod_name }} in {{ $labels.kubernetes_namespace }} has been down for more than 5 minutes."
+
+      - alert: IngestionQueueBacklog
+        expr: kafka_consumergroup_lag{consumergroup="hollow-purple-ingestion"} > 10000
+        for: 5m
+        labels:
+          severity: warning
+          service: ingestion
+        annotations:
+          summary: "Ingestion queue backlog"
+          description: "Ingestion consumer group has {{ $value }} messages backlog."
+
+      # Deception Engine Alerts
+      - alert: DeceptionEngineDown
+        expr: up{job="hollow-purple-deception"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: deception-engine
+        annotations:
+          summary: "Deception Engine is down"
+          description: "Deception Engine has been down for more than 5 minutes."
+
+      - alert: SuspiciousActivityDetected
+        expr: increase(deception_engine_suspicious_activities_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: info
+          service: deception-engine
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "{{ $value }} suspicious activities detected in the last 5 minutes."
+
+      # Database Alerts
+      - alert: DatabaseDown
+        expr: up{job=~"postgres|redis|neo4j"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Database service is down"
+          description: "{{ $labels.job }} database has been down for more than 5 minutes."
+
+      - alert: DatabaseHighConnectionCount
+        expr: pg_stat_activity_count{datname="hollowpurple"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High database connection count"
+          description: "PostgreSQL has {{ $value }} active connections."
+
+      - alert: RedisMemoryUsageHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis memory usage is {{ $value | printf "%.1f" }}%."
+
+      # Infrastructure Alerts
+      - alert: NodeCPUUsageHigh
+        expr: (1 - rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High CPU usage on node"
+          description: "CPU usage on {{ $labels.kubernetes_node_name }} is {{ $value | printf "%.1f" }}%."
+
+      - alert: NodeMemoryUsageHigh
+        expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High memory usage on node"
+          description: "Memory usage on {{ $labels.kubernetes_node_name }} is {{ $value | printf "%.1f" }}%."
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 15
+        for: 5m
+        labels:
+          severity: critical
+          service: infrastructure
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space on {{ $labels.kubernetes_node_name }} is below 15%."
+
+      # Security Alerts
+      - alert: FailedLoginAttempts
+        expr: increase(auth_failed_login_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Multiple failed login attempts"
+          description: "{{ $value }} failed login attempts in the last 5 minutes."
+
+      - alert: UnauthorizedAccessAttempt
+        expr: increase(security_unauthorized_access_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: security
+        annotations:
+          summary: "Unauthorized access attempt detected"
+          description: "Unauthorized access attempt detected from {{ $labels.source_ip }}."
+
+      # Performance Alerts
+      - alert: SlowQueryDetected
+        expr: histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Slow database query detected"
+          description: "95th percentile query time is {{ $value | printf "%.2f" }}s."
+
+      - alert: HighGCLatency
+        expr: rate(go_gc_duration_seconds_sum[5m]) / rate(go_gc_duration_seconds_count[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: application
+        annotations:
+          summary: "High garbage collection latency"
+          description: "Average GC pause time is {{ $value | printf "%.3f" }}s."

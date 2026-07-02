@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hollow Purple - SOC Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: 2px solid #ff6b6b;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00d4aa;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #cccccc;
+            margin-top: 5px;
+        }
+
+        .alert-critical {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border-left: 4px solid #ff4757;
+        }
+
+        .alert-high {
+            background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+            border-left: 4px solid #ff9800;
+        }
+
+        .alert-medium {
+            background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
+            border-left: 4px solid #2196f3;
+        }
+
+        .alert-low {
+            background: linear-gradient(135deg, #66bb6a 0%, #388e3c 100%);
+            border-left: 4px solid #4caf50;
+        }
+
+        .status-healthy {
+            color: #00d4aa;
+        }
+
+        .status-warning {
+            color: #ffa726;
+        }
+
+        .status-critical {
+            color: #ff6b6b;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .table {
+            color: #ffffff;
+        }
+
+        .table thead th {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .table tbody td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cyber-grid {
+            background-image:
+                linear-gradient(rgba(255, 107, 107, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 107, 107, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .threat-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .threat-critical { background-color: #ff4757; }
+        .threat-high { background-color: #ffa726; }
+        .threat-medium { background-color: #42a5f5; }
+        .threat-low { background-color: #66bb6a; }
+    </style>
+</head>
+<body class="cyber-grid">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt me-2"></i>
+                Hollow Purple - SOC Dashboard
+            </a>
+            <div class="d-flex">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user-circle me-1"></i>
+                    SOC Analyst
+                </span>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+                    <label class="form-check-label" for="autoRefreshToggle">
+                        Auto Refresh
+                    </label>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- System Status Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value status-healthy" id="systemHealth">98%</div>
+                    <div class="metric-label">System Health</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="activeThreats">12</div>
+                    <div class="metric-label">Active Threats</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="incidentsToday">3</div>
+                    <div class="metric-label">Incidents Today</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="mitigationsActive">8</div>
+                    <div class="metric-label">Active Mitigations</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Threats Panel -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Active Threats
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="threatsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Severity</th>
+                                        <th>Threat Type</th>
+                                        <th>Source</th>
+                                        <th>Detected</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threatsTableBody">
+                                    <!-- Threats will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Incidents Panel -->
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-fire me-2"></i>
+                            Recent Incidents
+                        </h5>
+                        <button class="btn btn-primary btn-sm" onclick="investigateIncident()">
+                            <i class="fas fa-search me-1"></i>
+                            Investigate
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="incidentsContainer">
+                            <!-- Incidents will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>
+                            Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="runSimulation()">
+                                <i class="fas fa-play-circle me-2"></i>
+                                Run Attack Simulation
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="generateReport()">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Generate Report
+                            </button>
+                            <button class="btn btn-outline-info" onclick="checkCompliance()">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Compliance Check
+                            </button>
+                            <button class="btn btn-outline-success" onclick="systemHealthCheck()">
+                                <i class="fas fa-heartbeat me-2"></i>
+                                Health Check
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-brain me-2"></i>
+                            AI Insights
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="search-form" class="d-flex gap-2 mb-3">
+                            <input id="search-query" type="text" class="form-control form-control-sm" placeholder="Ask anything, e.g. quantum computing" value="quantum computing" />
+                            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                        </form>
+                        <div id="aiInsights">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Enter a query and click Search to fetch insight-backed results.
+                            </div>
+                        </div>
+                        <div id="search-results"></div>
+                    </div>
+                </div>
+
+                <!-- System Metrics -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            System Metrics
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="metricsChart" width="100%" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attack Simulation Modal -->
+        <div class="modal fade" id="simulationModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-play-circle me-2"></i>
+                            Attack Simulation
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Simulation Scenario</label>
+                            <select class="form-select" id="simulationScenario">
+                                <option value="phishing_attack_chain">Phishing Attack Chain</option>
+                                <option value="apt_simulation_advanced">Advanced APT Simulation</option>
+                                <option value="ddos_attack_simulation">DDoS Attack Simulation</option>
+                                <option value="lateral_movement">Lateral Movement</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="simulationDuration" value="15" min="5" max="60">
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            This will run a controlled simulation in isolated environments.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="startSimulation()">
+                            <i class="fas fa-play me-1"></i>
+                            Start Simulation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8000';
+
+        // Global state
+        let autoRefresh = true;
+        let refreshInterval;
+        let websocket;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            setupWebSocket();
+            startAutoRefresh();
+        });
+
+        // Setup WebSocket connection
+        function setupWebSocket() {
+            websocket = new WebSocket('ws://localhost:8000/ws');
+
+            websocket.onopen = function(event) {
+                console.log('WebSocket connected');
+                websocket.send(JSON.stringify({
+                    type: 'subscribe',
+                    stream: 'threats'
+                }));
+                websocket.send(JSON.stringify({
+                    type: 'subscribe',
+                    stream: 'incidents'
+                }));
+            };
+
+            websocket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                handleRealtimeUpdate(data);
+            };
+
+            websocket.onclose = function(event) {
+                console.log('WebSocket disconnected');
+                setTimeout(setupWebSocket, 5000); // Reconnect after 5 seconds
+            };
+
+            websocket.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Handle real-time updates
+        function handleRealtimeUpdate(data) {
+            if (data.stream === 'threats') {
+                updateThreatsDisplay(data.data);
+            } else if (data.stream === 'incidents') {
+                updateIncidentsDisplay(data.data);
+            }
+        }
+
+        // Initialize dashboard
+        async function initializeDashboard() {
+            try {
+                await loadSystemStatus();
+                await loadThreats();
+                await loadIncidents();
+                await loadAIInsights();
+                initializeCharts();
+            } catch (error) {
+                console.error('Failed to initialize dashboard:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        // Load system status
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/system/status`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load system status');
+
+                const data = await response.json();
+                updateSystemStatus(data);
+            } catch (error) {
+                console.error('Error loading system status:', error);
+            }
+        }
+
+        // Update system status display
+        function updateSystemStatus(data) {
+            const healthElement = document.getElementById('systemHealth');
+            const health = data.overall_health === 'healthy' ? 98 : 75;
+
+            healthElement.textContent = `${health}%`;
+            healthElement.className = `metric-value ${health > 90 ? 'status-healthy' : health > 70 ? 'status-warning' : 'status-critical'}`;
+        }
+
+        // Load threats
+        async function loadThreats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/threats`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load threats');
+
+                const data = await response.json();
+                updateThreatsDisplay(data);
+            } catch (error) {
+                console.error('Error loading threats:', error);
+            }
+        }
+
+        // Update threats display
+        function updateThreatsDisplay(threats) {
+            const tbody = document.getElementById('threatsTableBody');
+            tbody.innerHTML = '';
+
+            // Mock threats data if API doesn't return real data
+            const mockThreats = [
+                {
+                    severity: 'critical',
+                    type: 'Ransomware',
+                    source: '192.168.1.100',
+                    detected: '2 minutes ago',
+                    status: 'Active'
+                },
+                {
+                    severity: 'high',
+                    type: 'Lateral Movement',
+                    source: '10.0.0.50',
+                    detected: '5 minutes ago',
+                    status: 'Investigating'
+                },
+                {
+                    severity: 'medium',
+                    type: 'Suspicious Login',
+                    source: 'external.domain.com',
+                    detected: '15 minutes ago',
+                    status: 'Monitoring'
+                }
+            ];
+
+            const displayThreats = threats && threats.length > 0 ? threats : mockThreats;
+
+            displayThreats.forEach(threat => {
+                const row = document.createElement('tr');
+
+                const severityClass = `threat-${threat.severity}`;
+                const statusClass = threat.status === 'Active' ? 'text-danger' :
+                                  threat.status === 'Investigating' ? 'text-warning' : 'text-info';
+
+                row.innerHTML = `
+                    <td><span class="threat-indicator ${severityClass}"></span>${threat.severity.toUpperCase()}</td>
+                    <td>${threat.type}</td>
+                    <td><code>${threat.source}</code></td>
+                    <td>${threat.detected}</td>
+                    <td><span class="${statusClass}">${threat.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="investigateThreat('${threat.id || 'mock'}')">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            // Update threat count
+            document.getElementById('activeThreats').textContent = displayThreats.length;
+        }
+
+        // Load incidents
+        async function loadIncidents() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/incidents`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load incidents');
+
+                const data = await response.json();
+                updateIncidentsDisplay(data);
+            } catch (error) {
+                console.error('Error loading incidents:', error);
+            }
+        }
+
+        // Update incidents display
+        function updateIncidentsDisplay(incidents) {
+            const container = document.getElementById('incidentsContainer');
+            container.innerHTML = '';
+
+            // Mock incidents data
+            const mockIncidents = [
+                {
+                    id: 'INC-001',
+                    title: 'Ransomware Deployment Detected',
+                    severity: 'critical',
+                    time: '2 minutes ago',
+                    status: 'Active'
+                },
+                {
+                    id: 'INC-002',
+                    title: 'Unauthorized Data Access',
+                    severity: 'high',
+                    time: '15 minutes ago',
+                    status: 'Investigating'
+                }
+            ];
+
+            const displayIncidents = incidents && incidents.length > 0 ? incidents : mockIncidents;
+
+            displayIncidents.forEach(incident => {
+                const alertClass = `alert-${incident.severity}`;
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert ${alertClass} d-flex justify-content-between align-items-center`;
+                alertDiv.innerHTML = `
+                    <div>
+                        <strong>${incident.title}</strong><br>
+                        <small class="text-muted">${incident.time} • ${incident.status}</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light" onclick="viewIncident('${incident.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                `;
+
+                container.appendChild(alertDiv);
+            });
+
+            // Update incident count
+            document.getElementById('incidentsToday').textContent = displayIncidents.length;
+        }
+
+        // Load AI insights
+        async function loadAIInsights() {
+            const insightsContainer = document.getElementById('aiInsights');
+
+            // Mock AI insights
+            const insights = [
+                "Detected potential lateral movement pattern from compromised workstation",
+                "Unusual data exfiltration volume detected from finance server",
+                "New phishing campaign targeting executive accounts identified",
+                "Recommended: Increase monitoring on east coast data centers"
+            ];
+
+            insightsContainer.innerHTML = insights.map(insight =>
+                `<div class="alert alert-secondary mb-2">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    ${insight}
+                </div>`
+            ).join('');
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            const ctx = document.getElementById('metricsChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: 'Threat Detection Rate',
+                        data: [12, 19, 15, 25, 22, 30],
+                        borderColor: '#00d4aa',
+                        backgroundColor: 'rgba(0, 212, 170, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'False Positives',
+                        data: [2, 3, 1, 4, 2, 1],
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#ffffff'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#ffffff'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Action handlers
+        function runSimulation() {
+            const modal = new bootstrap.Modal(document.getElementById('simulationModal'));
+            modal.show();
+        }
+
+        async function startSimulation() {
+            const scenario = document.getElementById('simulationScenario').value;
+            const duration = document.getElementById('simulationDuration').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/simulations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        scenario_id: scenario,
+                        duration: parseInt(duration) * 60 // Convert to seconds
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to start simulation');
+
+                const result = await response.json();
+                showSuccess(`Simulation started: ${scenario}`);
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('simulationModal'));
+                modal.hide();
+
+            } catch (error) {
+                console.error('Error starting simulation:', error);
+                showError('Failed to start simulation');
+            }
+        }
+
+        async function generateReport() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports/threat_summary`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to generate report');
+
+                const report = await response.json();
+                showSuccess('Report generated successfully');
+
+                // In a real implementation, this would open/download the report
+                console.log('Report:', report);
+
+            } catch (error) {
+                console.error('Error generating report:', error);
+                showError('Failed to generate report');
+            }
+        }
+
+        async function checkCompliance() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports/compliance`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to check compliance');
+
+                const compliance = await response.json();
+                showSuccess('Compliance check completed');
+
+                console.log('Compliance:', compliance);
+
+            } catch (error) {
+                console.error('Error checking compliance:', error);
+                showError('Failed to check compliance');
+            }
+        }
+
+        async function systemHealthCheck() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/system/status`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Health check failed');
+
+                const status = await response.json();
+                showSuccess('System health check passed');
+
+                console.log('System status:', status);
+
+            } catch (error) {
+                console.error('Health check failed:', error);
+                showError('System health check failed');
+            }
+        }
+
+        function investigateThreat(threatId) {
+            showInfo(`Investigating threat: ${threatId}`);
+            // In a real implementation, this would open an investigation modal/panel
+        }
+
+        function investigateIncident() {
+            showInfo('Starting incident investigation');
+            // In a real implementation, this would open an investigation interface
+        }
+
+        function viewIncident(incidentId) {
+            showInfo(`Viewing incident: ${incidentId}`);
+            // In a real implementation, this would open incident details
+        }
+
+        // Auto refresh functionality
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                if (autoRefresh) {
+                    loadSystemStatus();
+                    loadThreats();
+                    loadIncidents();
+                    loadAIInsights();
+                }
+            }, 30000); // Refresh every 30 seconds
+        }
+
+        document.getElementById('autoRefreshToggle').addEventListener('change', function(e) {
+            autoRefresh = e.target.checked;
+            if (autoRefresh) {
+                startAutoRefresh();
+            } else {
+                clearInterval(refreshInterval);
+            }
+        });
+
+        // Notification functions
+        function showSuccess(message) {
+            showNotification(message, 'success');
+        }
+
+        function showError(message) {
+            showNotification(message, 'error');
+        }
+
+        function showInfo(message) {
+            showNotification(message, 'info');
+        }
+
+        function showNotification(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' :
+                             type === 'error' ? 'alert-danger' : 'alert-info';
+
+            const alert = document.createElement('div');
+            alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(alert);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Error handling
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showError('An unexpected error occurred');
+        });
+
+        window.addEventListener('error', function(event) {
+            console.error('JavaScript error:', event.error);
+            showError('A JavaScript error occurred');
+        });
+    </script>
+</body>
+</html>

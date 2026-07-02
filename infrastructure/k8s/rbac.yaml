@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hollow-purple-sa
+  namespace: hollow-purple
+  labels:
+    app: hollow-purple
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hollow-purple-role
+  namespace: hollow-purple
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hollow-purple-rolebinding
+  namespace: hollow-purple
+subjects:
+- kind: ServiceAccount
+  name: hollow-purple-sa
+  namespace: hollow-purple
+roleRef:
+  kind: Role
+  name: hollow-purple-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hollow-purple-cluster-role
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "namespaces"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hollow-purple-cluster-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: hollow-purple-sa
+  namespace: hollow-purple
+roleRef:
+  kind: ClusterRole
+  name: hollow-purple-cluster-role
+  apiGroup: rbac.authorization.k8s.io

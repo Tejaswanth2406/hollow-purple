@@ -1,0 +1,236 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hollow-purple-config
+  namespace: hollow-purple
+data:
+  # Application Configuration
+  config.yaml: |
+    environment: production
+    log_level: INFO
+    enable_metrics: true
+    enable_tracing: true
+
+    # Control Plane Configuration
+    control_plane:
+      orchestrator:
+        max_concurrent_tasks: 50
+        task_timeout_seconds: 300
+      ai_reasoning:
+        model: gpt-4
+        temperature: 0.1
+        max_tokens: 2000
+      mahoraga_decision:
+        risk_threshold: 0.8
+        ethical_constraints: true
+        human_oversight_required: true
+
+    # Data Plane Configuration
+    data_plane:
+      ingestion:
+        batch_size: 1000
+        rate_limit_per_second: 10000
+      processing:
+        worker_threads: 8
+        queue_size: 10000
+      streaming:
+        kafka_topics:
+          - security-events
+          - threat-intelligence
+          - attack-patterns
+
+    # Security Configuration
+    security:
+      encryption:
+        algorithm: AES-256-GCM
+      authentication:
+        jwt_expiry_hours: 24
+        refresh_token_expiry_days: 30
+      authorization:
+        rbac_enabled: true
+        default_role: analyst
+
+    # Infrastructure Configuration
+    infrastructure:
+      redis:
+        max_connections: 100
+        connection_timeout: 5
+      postgres:
+        max_connections: 50
+        connection_timeout: 10
+      neo4j:
+        max_connection_pool_size: 100
+        connection_timeout: 30
+      kafka:
+        replication_factor: 3
+        retention_hours: 168
+
+  # Nginx Configuration
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    error_log /var/log/nginx/error.log notice;
+    pid /var/run/nginx.pid;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log /var/log/nginx/access.log main;
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+
+        # Gzip Settings
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 1024;
+        gzip_proxied any;
+        gzip_comp_level 6;
+        gzip_types
+            text/plain
+            text/css
+            text/xml
+            text/javascript
+            application/json
+            application/javascript
+            application/xml+rss
+            application/atom+xml
+            image/svg+xml;
+
+        # Rate Limiting
+        limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+        limit_req_zone $binary_remote_addr zone=auth:10m rate=5r/s;
+
+        upstream hollow_purple_api {
+            server hollow-purple-api-service:80;
+        }
+
+        server {
+            listen 80;
+            server_name api.hollow-purple.com;
+
+            # Security headers
+            add_header X-Frame-Options DENY;
+            add_header X-Content-Type-Options nosniff;
+            add_header X-XSS-Protection "1; mode=block";
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+
+            # Rate limiting for API endpoints
+            location /api/ {
+                limit_req zone=api burst=20 nodelay;
+                proxy_pass http://hollow_purple_api;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            # Stricter rate limiting for auth endpoints
+            location /auth/ {
+                limit_req zone=auth burst=5 nodelay;
+                proxy_pass http://hollow_purple_api;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            # Health check endpoint
+            location /health {
+                access_log off;
+                return 200 "healthy\n";
+                add_header Content-Type text/plain;
+            }
+        }
+    }
+
+  # Prometheus Configuration
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    rule_files:
+      # - "first_rules.yml"
+      # - "second_rules.yml"
+
+    scrape_configs:
+      - job_name: 'hollow-purple-api'
+        static_configs:
+          - targets: ['hollow-purple-api-service:8000']
+        metrics_path: '/metrics'
+        scrape_interval: 5s
+
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: kubernetes_pod_name
+
+  # Grafana Dashboard Configuration
+  grafana-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "Hollow Purple Security Overview",
+        "tags": ["security", "threat-detection"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "title": "Active Threats",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "hollow_purple_active_threats",
+                "refId": "A"
+              }
+            ]
+          },
+          {
+            "title": "Attack Patterns Over Time",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(hollow_purple_attack_patterns_total[5m])",
+                "refId": "A"
+              }
+            ]
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }

@@ -316,6 +316,37 @@ PE = Priv. Escalation  LM = Lateral Move  TA = Token Abuse  DI = Dormant Identit
 
 ---
 
+## Enterprise Readiness Milestone
+
+The project now includes a more production-oriented API surface and deployment path:
+
+- FastAPI app with OpenAPI docs and health/readiness endpoints
+- JWT-based authentication and RBAC-aware route protection
+- Docker Compose startup path for local evaluation
+- Kubernetes deployment manifests and a minimal Helm chart for cluster deployment
+
+### Quick start
+
+```bash
+python -m pip install -r requirements.txt
+python -m pytest -q tests/test_health_monitor.py tests/test_api_startup.py
+uvicorn api.server:app --host 0.0.0.0 --port 8000
+```
+
+### Docker Compose
+
+```bash
+docker compose -f infrastructure/docker-compose.yml up --build
+```
+
+### Helm
+
+```bash
+helm install hollow-purple ./infrastructure/helm/hollow-purple
+```
+
+---
+
 ## `$ diff hollow-purple industry-standard`
 
 ```diff

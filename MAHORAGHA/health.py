@@ -28,8 +28,8 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from enum import Enum, auto
-from typing import Callable, Optional
+from enum import Enum
+from typing import Any, Callable, Optional
 
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ class ComponentStatus:
             latency_s  = latency_s,
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name":       self.name,
             "state":      self.state.value,
@@ -109,6 +109,9 @@ class HealthReport:
     def is_healthy(self) -> bool:
         return self.band == HealthBand.GREEN
 
+    def failed_components(self) -> list[ComponentStatus]:
+        return [component for component in self.components if component.state == ComponentState.DOWN]
+
     def summary(self) -> str:
         counts = {s: 0 for s in ComponentState}
         for c in self.components:
@@ -120,13 +123,14 @@ class HealthReport:
             f"down={counts[ComponentState.DOWN]}"
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "band":             self.band.value,
             "checked_at":       self.checked_at.isoformat(),
             "check_duration_s": round(self.check_duration_s, 4),
             "summary":          self.summary(),
             "components":       [c.to_dict() for c in self.components],
+            "failed_components": [c.to_dict() for c in self.failed_components()],
         }
 
 
@@ -138,7 +142,7 @@ class _ProbeRecord:
     probe:             Callable[[], ComponentStatus]
     timeout_s:         float
     consecutive_fails: int                    = 0
-    history:           deque                  = field(default_factory=lambda: deque(maxlen=100))
+    history:           deque[ComponentStatus] = field(default_factory=lambda: deque(maxlen=100))
 
 
 # ── HealthMonitor ─────────────────────────────────────────────────────────────
@@ -195,7 +199,7 @@ class HealthMonitor:
         with self._lock:
             probe_records = list(self._probes.values())
 
-        statuses = []
+        statuses: list[ComponentStatus] = []
         for rec in probe_records:
             status = self._run_probe(rec, now)
             statuses.append(status)
@@ -287,7 +291,7 @@ class HealthMonitor:
     # ── built-in probe factories ──────────────────────────────────────────────
 
     @staticmethod
-    def backpressure_probe(controller) -> Callable[[], ComponentStatus]:
+    def backpressure_probe(controller: Any) -> Callable[[], ComponentStatus]:
         """
         H7: factory for BackpressureController probes.
         Returns DEGRADED when pressure is ELEVATED, DOWN when OVERLOADED.
@@ -312,7 +316,7 @@ class HealthMonitor:
         return _probe
 
     @staticmethod
-    def drift_probe(monitor, max_acceptable_drift: float = 0.8) -> Callable[[], ComponentStatus]:
+    def drift_probe(monitor: Any, max_acceptable_drift: float = 0.8) -> Callable[[], ComponentStatus]:
         """
         H8: factory for DriftEnvelopeMonitor probes.
         Returns DEGRADED when drift > 80% of envelope, DOWN on violation.
@@ -340,7 +344,7 @@ class HealthMonitor:
         return _probe
 
     @staticmethod
-    def merkle_log_probe(log) -> Callable[[], ComponentStatus]:
+    def merkle_log_probe(log: Any) -> Callable[[], ComponentStatus]:
         """Probe for MerkleLog integrity: chain length and head hash readable."""
         def _probe() -> ComponentStatus:
             try:
@@ -355,7 +359,7 @@ class HealthMonitor:
         return _probe
 
     @staticmethod
-    def snapshot_store_probe(store) -> Callable[[], ComponentStatus]:
+    def snapshot_store_probe(store: Any) -> Callable[[], ComponentStatus]:
         """Probe for PersistentSealedSnapshotStore: manifest readable."""
         def _probe() -> ComponentStatus:
             try:
