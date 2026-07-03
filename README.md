@@ -9,9 +9,8 @@ $ whoami
 Attackers explore a maze.
 Hollow Purple watches the movement.
 MAHORAGHA moves the walls.
-
----
 ```
+---
 $ cat /proc/architecture
 
 
