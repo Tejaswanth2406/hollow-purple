@@ -1,18 +1,18 @@
 <img width="1425" height="460" alt="image" src="https://github.com/user-attachments/assets/84bd924f-f331-4f5f-aca0-24f19fb213f5" />
-
 ```
-## `$ whoami`
-> **Hollow Purple** is an adaptive cloud identity intelligence system.  
-> It doesn't fire alerts — it *understands behavior*.  
-> It doesn't chase intruders — **it moves the walls.**
+$ whoami
+> Hollow Purple is an adaptive cloud identity intelligence system.  
+> It doesn't fire alerts — it understands behavior.  
+> It doesn't chase intruders — it moves the walls.
 ```
 Attackers explore a maze.
 Hollow Purple watches the movement.
 MAHORAGHA moves the walls.
 ```
 ---
-## `$ cat /proc/architecture`
+$ cat /proc/architecture
 ```
+
 ┌─────────────────────────────────────────────────────────┐
 │                    SYSTEM OVERVIEW                      │
 ├──────────────────┬──────────────────────────────────────┤
@@ -20,6 +20,7 @@ MAHORAGHA moves the walls.
 │ BRIDGE           │ COPY LAYER — Evolutionary Memory     │
 │ PHASE 2          │ MAHORAGHA — Adaptive Defense Engine  │
 └──────────────────┴──────────────────────────────────────┘
+
 
   [CLOUD EVENTS] ──► [EVENT LEDGER] ──► [GRAPH ENGINE]
                                               │
@@ -33,7 +34,7 @@ MAHORAGHA moves the walls.
                                    [MAHORAGHA ADE] ──► Architect Gate ──► MUTATE
 ```
 ---
-## `$ netstat -an | grep ACTIVE`
+$ netstat -an | grep ACTIVE
 ```
 CLOUD PROVIDER    IDENTITIES TRACKED    STATUS
 ─────────────────────────────────────────────────
@@ -47,7 +48,7 @@ PATTERNS STORED   61                    +7 THIS CYCLE
 GINI COEFFICIENT  0.74                  ⚠ HIGH RISK
 ```
 ---
-## `$ ls -la /modules`
+$ ls -la /modules
 ```
 hollow-purple/
 ├── core/
@@ -188,7 +189,7 @@ hollow-purple/
 └── main.env.example
 ```
 ---
-## `$ cat /proc/metrics`
+$ cat /proc/metrics
 ```python
 # Temporal Spread Score
 # Fast escalation = high score · Slow creep = detectable but dampened
