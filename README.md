@@ -49,7 +49,7 @@ HIGH-PRIV PATHS   143                   ↑ 12 FLAGGED
 PATTERNS STORED   61                    +7 THIS CYCLE
 GINI COEFFICIENT  0.74                  ⚠ HIGH RISK
 
-```
+
 $ ls -la /modules
 ---
 hollow-purple/
@@ -190,7 +190,7 @@ hollow-purple/
 ├── requirements.txt
 └── main.env.example
 ---
-```
+
 $ cat /proc/metrics
 ```python
 # Temporal Spread Score
