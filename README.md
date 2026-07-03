@@ -312,23 +312,15 @@ helm install hollow-purple ./infrastructure/helm/hollow-purple
 ```diff
   CAPABILITY                      GUARDUTY/SCC  UEBA  SIEM/XDR  HOLLOW PURPLE
   ─────────────────────────────────────────────────────────────────────────────
-  IAM anomaly detection                ✔          ✔      ✔           ✔
-- Graph-based modeling              PARTIAL    PARTIAL    ✗
-+ Graph-based modeling                                              ✔
-- Persistent pattern memory             ✗          ✗      ✗
-+ Persistent pattern memory                                         ✔
-- Architecture mutation feedback        ✗          ✗      ✗
-+ Architecture mutation feedback                                    ✔
-- Human-gated evolution                 ✗          ✗      ✗
-+ Human-gated evolution                                             ✔
-- Slow-path credential abuse         ✗       PARTIAL      ✗
-+ Slow-path credential abuse                                        ✔
-- Merkle tamper-evident log             ✗          ✗      ✗
-+ Merkle tamper-evident log                                         ✔
-- Deterministic state replay            ✗          ✗      ✗
-+ Deterministic state replay                                        ✔
-- Zero production mutation risk         ✗          ✗      ✗
-+ Zero production mutation risk                                     ✔
+  IAM anomaly detection                 ✔          ✔      ✔         ✔
+  Graph-based modeling              PARTIAL    PARTIAL    ✗          ✔
+  Persistent pattern memory             ✗          ✗      ✗         ✔
+  Architecture mutation feedback        ✗          ✗      ✗         ✔
+  Human-gated evolution                 ✗          ✗      ✗         ✔
+  Slow-path credential abuse            ✗       PARTIAL   ✗         ✔
+  Merkle tamper-evident log             ✗          ✗      ✗         ✔
+  Deterministic state replay                                         ✔
+  Zero production mutation risk         ✗          ✗      ✗        ✔
 ```
 ---
 ## `$ cat /proc/db_stack`
