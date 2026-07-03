@@ -9,8 +9,9 @@ $ whoami
 Attackers explore a maze.
 Hollow Purple watches the movement.
 MAHORAGHA moves the walls.
-```
+
 ---
+```
 $ cat /proc/architecture
 
 
@@ -50,7 +51,7 @@ GINI COEFFICIENT  0.74                  ⚠ HIGH RISK
 
 
 $ ls -la /modules
-
+---
 hollow-purple/
 ├── core/
 │   ├── models.py              # data schemas, event structures
@@ -188,7 +189,6 @@ hollow-purple/
 ├── soc_dashboard.html         # SOC monitoring dashboard
 ├── requirements.txt
 └── main.env.example
-
 ---
 $ cat /proc/metrics
 ```python
