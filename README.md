@@ -41,6 +41,9 @@ MAHORAGHA moves the walls.
 
 ---
 
+
+
+
 ## `$ netstat -an | grep ACTIVE`
 
 ```
@@ -59,6 +62,7 @@ GINI COEFFICIENT  0.74                  ⚠ HIGH RISK
 ---
 
 ## `$ ls -la /modules`
+
 
 ```
 hollow-purple/
@@ -200,6 +204,7 @@ hollow-purple/
 └── main.env.example
 ```
 
+
 ---
 
 ## `$ cat /proc/metrics`
@@ -291,7 +296,7 @@ PE = Priv. Escalation  LM = Lateral Move  TA = Token Abuse  DI = Dormant Identit
 ├─────────────────────────────────────────────────────────────────┤
 │  PATTERN   : H2S_privilege_bridge_v2                            │
 │  PATH      : workload-identity → roles/editor → iam.admin       │
-│  ACTION    : Insert intermediate binding + iam.securityAdmin     │
+│  ACTION    : Insert intermediate binding + iam.securityAdmin    │
 │  RR DELTA  : −18 high-priv paths                                │
 │  MES DELTA : +2 hops (harder to reach)                          │
 │  PM DELTA  : −11 routes                                         │
@@ -304,7 +309,7 @@ PE = Priv. Escalation  LM = Lateral Move  TA = Token Abuse  DI = Dormant Identit
 ├─────────────────────────────────────────────────────────────────┤
 │  PATTERN   : sts_credential_chain_v3                            │
 │  PATH      : ci-runner → sts:AssumeRole → AdministratorAccess   │
-│  ACTION    : Scope trust policy to tagged environments only      │
+│  ACTION    : Scope trust policy to tagged environments only     │
 │  CONDITION : aws:PrincipalTag ci-environment:staging            │
 │  RR DELTA  : −9 paths                                           │
 │  MES DELTA : +1 hop                                             │
@@ -506,11 +511,11 @@ b1e4f72  Phase 2: behavioral baseline + identity entropy monitoring
 ```
 ╔══════════════════════════════════════════════════════════════════╗
 ║  HOLLOW PURPLE  ·  Adaptive Cloud Identity Architecture          ║
-║  github.com/Tejaswanth2406/hollow-purple                        ║
+║  github.com/Tejaswanth2406/hollow-purple                         ║
 ║                                                                  ║
 ║  HOLLOW PURPLE = Security Intelligence Brain                     ║
 ║  MAHORAGHA     = Adaptive Defense + Integrity Engine             ║
 ║                                                                  ║
-║  STATUS: COMPLETE ✓ · KERNEL ACTIVE · MAHORAGHA DEPLOYED        ║
+║  STATUS: COMPLETE ✓ · KERNEL ACTIVE · MAHORAGHA DEPLOYED         ║
 ╚══════════════════════════════════════════════════════════════════╝
 ```
