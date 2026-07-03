@@ -72,11 +72,13 @@ hollow-purple/
 │
 ├── ingestion/
 │   ├── pull.py                # ingestion entry point
-│   ├── aws_collector.py       # CloudTrail · GuardDuty · STS
-│   ├── gcp_collector.py       # Audit Logs · SCC · Pub/Sub
-│   ├── azure_collector.py     # Activity Logs · Entra ID · Defender
 │   ├── normalizer.py          # schema unification layer
-│   └── rate_limiter.py        # backpressure control
+│   ├── rate_limiter.py        # backpressure control
+│   ├── collectors/            # AWS, GCP, Azure, Webhook
+│   ├── processors/            # enrichment, parsing, deduplication
+│   ├── queue/                 # event queues, batching
+│   ├── reliability/           # dead letters, retry, circuit breaker
+│   └── schemas/
 │
 ├── graph/
 │   ├── builder.py             # dynamic IAM graph construction
@@ -141,42 +143,35 @@ hollow-purple/
 │   └── alerts_view.js
 │
 ├── MAHORAGHA/                 # ── ADAPTIVE DEFENSE ENGINE ──
-│   ├── adversarial_simulator.py
 │   ├── alert_router.py
 │   ├── audit_log.py
-│   ├── governance.py          # human authority gate
+│   ├── Governance.py          # human authority gate
 │   ├── health.py
-│   ├── invariants.py
-│   ├── retention.py
-│   ├── utils.py
-│   └── telemetry.py
+│   ├── phase2/                # drift / baseline monitoring
+│   │   ├── baseline_drift_detector.py
+│   │   ├── identity_entropy_monitor.py
+│   │   └── risk_calibrator.py
+│   ├── phase3/                # merkle / cryptographic integrity
+│   │   ├── merkle_log.py
+│   │   ├── signed_tree_head.py
+│   │   └── shadow_rebuild.py
+│   ├── phase4/                # deterministic replay
+│   │   ├── deterministic_replay.py
+│   │   ├── state_reconstructor.py
+│   │   └── audit_verifier.py
+│   └── phase5/                # consensus / verification
+│       ├── consensus.py
+│       ├── witness_node.py
+│       └── verification_cluster.py
 │
-├── merkle/
-│   ├── merkle_log.py          # cryptographic event chaining
-│   ├── signed_tree_head.py    # STH generation + verification
-│   ├── shadow_rebuild.py      # integrity reconstruction
-│   ├── snapshot.py
-│   ├── drift_envelope.py
-│   ├── backpressure.py
-│   └── adversarial.py
+├── autonomous_defense_ai/     # ── PROBABILISTIC AI MODULE ──
+│   ├── probabilistic_attack_graph/
+│   ├── reinforcement_defense/
+│   └── graph_neural_network/
 │
-├── replay/
-│   ├── deterministic_replay.py   # time-travel state reconstruction
-│   ├── replay_validator.py
-│   ├── state_reconstructor.py
-│   ├── pipeline.py
-│   └── audit_verifier.py
-│
-├── consensus/
-│   ├── consensus.py
-│   ├── witness_node.py
-│   ├── log_gossip.py
-│   └── verification_cluster.py
-│
-├── drift/
-│   ├── baseline_drift_detector.py
-│   ├── identity_entropy_monitor.py
-│   └── risk_calibrator.py
+├── soc_dashboard/             # ── SOC MONITORING FRONTEND ──
+│   ├── backend/
+│   └── frontend/
 │
 ├── scripts/
 │   ├── bootstrap_env.py
