@@ -1,23 +1,17 @@
 <img width="1425" height="460" alt="image" src="https://github.com/user-attachments/assets/84bd924f-f331-4f5f-aca0-24f19fb213f5" />
 
 ```
-
 ## `$ whoami`
-
 > **Hollow Purple** is an adaptive cloud identity intelligence system.  
 > It doesn't fire alerts — it *understands behavior*.  
 > It doesn't chase intruders — **it moves the walls.**
-
 ```
 Attackers explore a maze.
 Hollow Purple watches the movement.
 MAHORAGHA moves the walls.
 ```
-
 ---
-
 ## `$ cat /proc/architecture`
-
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    SYSTEM OVERVIEW                      │
@@ -38,14 +32,8 @@ MAHORAGHA moves the walls.
                                               ▼
                                    [MAHORAGHA ADE] ──► Architect Gate ──► MUTATE
 ```
-
 ---
-
-
-
-
 ## `$ netstat -an | grep ACTIVE`
-
 ```
 CLOUD PROVIDER    IDENTITIES TRACKED    STATUS
 ─────────────────────────────────────────────────
@@ -58,12 +46,8 @@ HIGH-PRIV PATHS   143                   ↑ 12 FLAGGED
 PATTERNS STORED   61                    +7 THIS CYCLE
 GINI COEFFICIENT  0.74                  ⚠ HIGH RISK
 ```
-
 ---
-
 ## `$ ls -la /modules`
-
-
 ```
 hollow-purple/
 ├── core/
@@ -203,38 +187,26 @@ hollow-purple/
 ├── requirements.txt
 └── main.env.example
 ```
-
-
 ---
-
 ## `$ cat /proc/metrics`
-
 ```python
 # Temporal Spread Score
 # Fast escalation = high score · Slow creep = detectable but dampened
 TS = (ΔPrivilege) / log(ΔTime)
-
 # Privilege Gradient
 # For path P = (n₁, n₂, …, nₖ) with privilege levels L
 PG = Σ[L(nᵢ₊₁) - L(nᵢ)]
-
 # Reachability Reduction
 RR = |reach_before| − |reach_after|
-
 # Mean Escalation Steps
 MES = avg hops to admin-equiv
-
 # Path Multiplicity
 PM = distinct paths to admin roles
-
 # Gini Coefficient — privilege concentration ∈ [0,1]
 GINI = 0.74  # ← current · HIGH RISK threshold
 ```
-
 ---
-
 ## `$ cat /proc/threat_model`
-
 ```
 TARGET THREAT CLASS           DETECTION METHOD
 ────────────────────────────────────────────────────────────────
@@ -245,11 +217,8 @@ Insider Threats               Identity entropy monitoring
 Token Abuse                   Credential chain pattern memory
 Privilege Escalation          Privilege gradient + isomorphism gate
 ```
-
 ---
-
 ## `$ curl localhost:8080/api --list`
-
 ```
 POST   /ingest        →  event ingestion
 GET    /events        →  ledger query
@@ -260,11 +229,8 @@ GET    /anomalies     →  anomaly scores
 POST   /simulate      →  adversarial attack simulation
 POST   /mitigate      →  [GATED] architect-approved mutation
 ```
-
 ---
-
 ## `$ cat /proc/copy_layer`
-
 ```
 PATTERN GATE — 4 CRITERIA REQUIRED TO FORWARD:
 
@@ -285,11 +251,8 @@ ID   TYPE  NAME                        CLOUD  OBS  CONF
 ────────────────────────────────────────────────────────────────────
 PE = Priv. Escalation  LM = Lateral Move  TA = Token Abuse  DI = Dormant Identity
 ```
-
 ---
-
 ## `$ cat /proc/mahoragha/proposals`
-
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  MAH-003  ·  GCP IAM MUTATION  ·  HIGH IMPACT  ·  PENDING ⏳    │
@@ -318,9 +281,7 @@ PE = Priv. Escalation  LM = Lateral Move  TA = Token Abuse  DI = Dormant Identit
 │  STATUS    : AWAITING ARCHITECT APPROVAL                        │
 └─────────────────────────────────────────────────────────────────┘
 ```
-
 ---
-
 ## Enterprise Readiness Milestone
 
 The project now includes a more production-oriented API surface and deployment path:
@@ -331,29 +292,21 @@ The project now includes a more production-oriented API surface and deployment p
 - Kubernetes deployment manifests and a minimal Helm chart for cluster deployment
 
 ### Quick start
-
 ```bash
 python -m pip install -r requirements.txt
 python -m pytest -q tests/test_health_monitor.py tests/test_api_startup.py
 uvicorn api.server:app --host 0.0.0.0 --port 8000
 ```
-
 ### Docker Compose
-
 ```bash
 docker compose -f infrastructure/docker-compose.yml up --build
 ```
-
 ### Helm
-
 ```bash
 helm install hollow-purple ./infrastructure/helm/hollow-purple
 ```
-
 ---
-
 ## `$ diff hollow-purple industry-standard`
-
 ```diff
   CAPABILITY                      GUARDUTY/SCC  UEBA  SIEM/XDR  HOLLOW PURPLE
   ─────────────────────────────────────────────────────────────────────────────
@@ -375,11 +328,8 @@ helm install hollow-purple ./infrastructure/helm/hollow-purple
 - Zero production mutation risk         ✗          ✗      ✗
 + Zero production mutation risk                                     ✔
 ```
-
 ---
-
 ## `$ cat /proc/db_stack`
-
 ```
 PostgreSQL   ──  Event ledger · JSONB patterns · immutable writes
 Redis        ──  Caching · streaming queues · ingestion backpressure
@@ -388,11 +338,8 @@ DuckDB       ──  OLAP analytics on immutable graph snapshots
 InfluxDB     ──  Time-series metric evolution · baseline drift history
 Prometheus   ──  RR · PM · MES · Gini coefficient telemetry
 ```
-
 ---
-
 ## `$ cat /proc/deploy`
-
 ```yaml
 platform: GCP
 services:
@@ -424,11 +371,8 @@ performance:
   graph_nodes: millions (real-time)
   anomaly_detection: real-time
 ```
-
 ---
-
 ## `$ cat /proc/safety`
-
 ```
 GOVERNANCE RULES — HARD CONSTRAINTS — CANNOT BE OVERRIDDEN:
 
@@ -440,11 +384,8 @@ GOVERNANCE RULES — HARD CONSTRAINTS — CANNOT BE OVERRIDDEN:
   ✔  Zero production mutation risk
   ✔  Merkle-chained tamper evidence on all events
 ```
-
 ---
-
 ## `$ tail -f /var/log/hollow-purple/adaptation.log`
-
 ```
 [09:14:32] [OBS] Identity svc-acct-04 assumed roles/editor via workload identity federation. Δ+3.
 [09:18:07] [PAT] H2S_privilege_bridge_v2 threshold reached (N=7). Forwarding to Copy Layer.
@@ -454,11 +395,8 @@ GOVERNANCE RULES — HARD CONSTRAINTS — CANNOT BE OVERRIDDEN:
 [10:01:55] [OBS] Dormant identity az-sp-0091 reactivated after 47-day silence. Rare access triggered.
 [10:14:39] [PAT] viewer_to_owner_drift_v1 context independence confirmed across 3 GCP projects.
 ```
-
 ---
-
 ## `$ cat /proc/security_properties`
-
 ```
 PROPERTY        MECHANISM
 ──────────────────────────────────────────────────────
@@ -469,11 +407,8 @@ Adaptability    MAHORAGHA continuous learning engine
 Consensus       Witness node verification cluster
 Resilience      Backpressure + drift envelopes
 ```
-
 ---
-
 ## `$ grep -r "philosophy" .`
-
 ```python
 # kernel/kernel.py
 
@@ -493,11 +428,8 @@ Hollow Purple + MAHORAGHA:
 # We move the walls.
 """
 ```
-
 ---
-
 ## `$ git log --oneline`
-
 ```
 a3f91c2  (HEAD → main) MAHORAGHA ADE: full adaptive defense engine + Merkle verification
 d82b4e1  Phase 4: deterministic replay engine + audit verifier
@@ -505,9 +437,7 @@ d82b4e1  Phase 4: deterministic replay engine + audit verifier
 b1e4f72  Phase 2: behavioral baseline + identity entropy monitoring
 0da9c31  Phase 1: event ledger foundation + Merkle hash chaining
 ```
-
 ---
-
 ```
 ╔══════════════════════════════════════════════════════════════════╗
 ║  HOLLOW PURPLE  ·  Adaptive Cloud Identity Architecture          ║
