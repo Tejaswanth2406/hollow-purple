@@ -100,6 +100,7 @@ hollow-purple/
 │   └── rare_access.py
 │
 ├── kernel/                    # platform kernel · orchestration core
+│   └── kernel.py
 │
 ├── state/
 │   ├── state_machine.py
@@ -182,6 +183,8 @@ hollow-purple/
 │   ├── run_pipeline.py
 │   └── simulate_attack.py
 │
+├── infrastructure/            # K8s · Helm · Terraform · Compose
+│
 ├── configs/
 │   ├── default.yaml
 │   ├── aws_weights.yaml
@@ -196,6 +199,8 @@ hollow-purple/
 │   └── test_phase5.py
 │
 ├── main.py
+├── index.html                 # Vercel deployment entry point
+├── soc_dashboard.html         # SOC monitoring dashboard
 ├── requirements.txt
 └── main.env.example
 ```
@@ -470,7 +475,7 @@ Resilience      Backpressure + drift envelopes
 ## `$ grep -r "philosophy" .`
 
 ```python
-# hollow_purple/kernel/core.py
+# kernel/kernel.py
 
 SYSTEM_PHILOSOPHY = """
 Traditional SIEM:
