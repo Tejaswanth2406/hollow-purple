@@ -1,5 +1,6 @@
 <img width="1425" height="460" alt="image" src="https://github.com/user-attachments/assets/84bd924f-f331-4f5f-aca0-24f19fb213f5" />
-
+```
+---
 $ whoami
 > Hollow Purple is an adaptive cloud identity intelligence system.  
 > It doesn't fire alerts — it understands behavior.  
@@ -8,8 +9,8 @@ $ whoami
 Attackers explore a maze.
 Hollow Purple watches the movement.
 MAHORAGHA moves the walls.
-
-
+```
+---
 $ cat /proc/architecture
 
 
