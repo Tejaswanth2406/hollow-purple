@@ -4,14 +4,14 @@ $ whoami
 > Hollow Purple is an adaptive cloud identity intelligence system.  
 > It doesn't fire alerts — it understands behavior.  
 > It doesn't chase intruders — it moves the walls.
-```
+
 Attackers explore a maze.
 Hollow Purple watches the movement.
 MAHORAGHA moves the walls.
-```
+
 ---
 $ cat /proc/architecture
-```
+
 
 ┌─────────────────────────────────────────────────────────┐
 │                    SYSTEM OVERVIEW                      │
@@ -32,7 +32,7 @@ $ cat /proc/architecture
                                               │
                                               ▼
                                    [MAHORAGHA ADE] ──► Architect Gate ──► MUTATE
-```
+
 ---
 $ netstat -an | grep ACTIVE
 ```
@@ -46,8 +46,8 @@ TOTAL             2,847                 ALL SYSTEMS GO
 HIGH-PRIV PATHS   143                   ↑ 12 FLAGGED
 PATTERNS STORED   61                    +7 THIS CYCLE
 GINI COEFFICIENT  0.74                  ⚠ HIGH RISK
-```
----
+
+
 $ ls -la /modules
 
 hollow-purple/
